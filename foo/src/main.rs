@@ -1,15 +1,15 @@
 fn main() {
-    let number = 6;
+    let mut s = String::from("hello");
+    //let mut s = "hello";
+    println!("add : {:p}", &s);
+    s = "bla".to_string();
+    println!("add : {:p}", &s);
 
-    if number % 4 == 0 {
-        println!("number is divisible by 4");
-    } else if number % 3 == 0 {
-        println!("number is divisible by 3");
-    } else if number % 2 == 0 {
-        println!("number is divisible by 2");
-    } else {
-        println!("number is not divisible by 4, 3, or 2");
-    }
+    let mut s33 = String::from("hello333");
+    s.push_str(", world!hellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohello"); // push_str() appends a literal to a String
+    println!("add : {:p}", &s);
 
-    // https://doc.rust-lang.org/book/ch03-05-control-flow.html#using-if-in-a-let-statement
+    println!("{}", s);
+
+    // https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#variables-and-data-interacting-with-move
 }
