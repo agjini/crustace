@@ -1,15 +1,11 @@
 fn main() {
     let mut s = String::from("hello");
-    //let mut s = "hello";
-    println!("add : {:p}", &s);
-    s = "bla".to_string();
-    println!("add : {:p}", &s);
 
-    let mut s33 = String::from("hello333");
-    s.push_str(", world!hellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohello"); // push_str() appends a literal to a String
-    println!("add : {:p}", &s);
+    change(&mut s);
 
-    println!("{}", s);
+    // https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#mutable-references
+}
 
-    // https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#variables-and-data-interacting-with-move
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
 }
