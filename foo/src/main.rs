@@ -1,11 +1,19 @@
-fn main() {
-    let mut s = String::from("hello");
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
 
-    change(&mut s);
+    for (i, item) in bytes.iter().enumerate() {
+        println!("{i}/{item}");
+        if *item == b' ' {
+            return i;
+        }
+    }
 
-    // https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html#mutable-references
+    s.len()
+
+    // https://doc.rust-lang.org/book/ch04-03-slices.html#the-slice-type
 }
 
-fn change(some_string: &mut String) {
-    some_string.push_str(", world");
+fn main(){
+    let s = String::from("hello world");
+    first_word(&s);
 }
