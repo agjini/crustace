@@ -29,4 +29,6 @@ fn main() {
     // Because string literals *are* string slices already,
     // this works too, without the slice syntax!
     let word = first_word(my_string_literal);
+
+    // https://doc.rust-lang.org/book/ch05-01-defining-structs.html#ownership-of-struct-data
 }
