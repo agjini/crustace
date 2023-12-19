@@ -1,5 +1,5 @@
 mod back_of_house {
-    use crate::back_of_house;
+    pub use crate::customer::eat_at_restaurant;
 
     pub enum Appetizer {
         Soup,
@@ -37,11 +37,7 @@ pub fn eat_at_restaurant() {
     //meal.seasonal_fruit = String::from("blueberries");
 }
 
-mod front_of_house {
-    pub mod hosting {
-        pub fn add_to_waitlist() {}
-    }
-}
+mod front_of_house;
 
 mod customer {
     use crate::front_of_house::hosting::add_to_waitlist;
