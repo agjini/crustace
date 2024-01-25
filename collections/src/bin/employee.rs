@@ -5,11 +5,23 @@ fn main() {
     let mut employees = vec!["Jean", "Marc", "Sally"];
 }
 
-struct PeopleByDepartment(HashMap<String, String>);
+struct Company {
+    people_by_department: HashMap<String, Vec<String>>,
+}
 
-impl PeopleByDepartment {
+impl Company {
     pub fn get_people_by_department(&self) -> String {
-        "".to_string()
+        return format!(
+            "Sales : {}",
+            self.people_by_department.get("Sales").unwrap().join(", ")
+        );
+        // let mut people_by_department: HashMap<String, Vec<String>> = HashMap::new();
+        // people_by_department = self
+        //     .people_by_department
+        //     .iter()
+        //     .filter(|e| e.1 == department)
+        //     .collect();
+        // return format!("{} : {}", people_by_department);
     }
 }
 
@@ -19,13 +31,32 @@ mod test {
 
     #[test]
     fn get_people_by_department_when_empty() {
-        let value = PeopleByDepartment(HashMap::new());
-        assert_eq!("", value.get_people_by_department());
+        let company = Company {
+            people_by_department: HashMap::new(),
+        };
+        assert_eq!("", company.get_people_by_department());
     }
 
     #[test]
     fn get_people_by_department_when_filled_with_sally() {
-        let value = PeopleByDepartment(HashMap::new());
-        assert_eq!("Sales : Sally", value.get_people_by_department());
+        let mut people_by_department = HashMap::new();
+        people_by_department.insert("Sales".to_string(), vec!["Sally".to_string()]);
+        let company = Company {
+            people_by_department,
+        };
+        assert_eq!("Sales : Sally", company.get_people_by_department());
+    }
+
+    #[test]
+    fn get_people_by_department_when_filled_with_more_than_Sally() {
+        let mut people_by_department = HashMap::new();
+        people_by_department.insert(
+            "Sales".to_string(),
+            vec!["Sally".to_string(), "Marc".to_string()],
+        );
+        let company = Company {
+            people_by_department,
+        };
+        assert_eq!("Sales : Sally, Marc", company.get_people_by_department());
     }
 }
