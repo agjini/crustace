@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+use regex;
+use regex::Match;
+
 fn main() {
     let mut employees = vec!["Jean", "Marc", "Sally"];
 }
@@ -9,28 +12,27 @@ struct Company {
 }
 
 impl Company {
-    pub fn new(people_by_department: HashMap<String, Vec<String>>) -> Company {
-        let mut entries: Vec<(&String, &Vec<String>)> = people_by_department.iter().collect();
-        entries.sort_by_key(|e| e.0);
-
-        for entry in entries {
-            let mut people = entry.1;
-            let mut cloned = people.clone();
-            cloned.sort();
-        }
-
+    pub fn new() -> Company {
         Self {
-            people_by_department,
+            people_by_department: HashMap::new(),
         }
+    }
+
+    pub fn add_people(&mut self, name: &str, department: &str) {
+        let people = self
+            .people_by_department
+            .entry(department.to_string())
+            .or_insert(vec![]);
+        people.push(name.to_string());
     }
 
     pub fn all_people_in_the_company_by_department(&self) -> String {
         let mut all_people = "".to_string();
         let mut entries: Vec<(&String, &Vec<String>)> = self.people_by_department.iter().collect();
-        //entries.sort_by_key(|e| e.0);
+        entries.sort_by_key(|e| e.0);
         for (department, peoples) in entries {
             let mut sorted_peoples = peoples.clone();
-            //sorted_peoples.sort();
+            sorted_peoples.sort();
             let s = format!("- {} : {}", department, sorted_peoples.join(", "));
             if !all_people.is_empty() {
                 all_people.push('\n');
@@ -50,6 +52,19 @@ impl Company {
             }
         }
     }
+
+    pub fn parse_user_input(input: &str) -> (&str, &str) {
+        let r = regex::Regex::new("^Add (.*) to (.*)\\.?$");
+        let matches = r.unwrap().captures(input).unwrap();
+        let res: Vec<Option<Match>> = matches.iter().collect();
+        let res: Vec<&str> = res.iter().map(|m| m.unwrap().as_str()).collect();
+        println!("{res:?}");
+        if res.len() != 3 {
+            panic!("Unable to extract people and department from the given input");
+        }
+
+        (res[2], res[1])
+    }
 }
 
 #[cfg(test)]
@@ -58,17 +73,14 @@ mod test {
 
     #[test]
     fn get_people_by_department_when_empty() {
-        let company = Company::new(HashMap::new());
+        let company = Company::new();
         assert_eq!("", company.all_people_in_the_company_by_department());
     }
 
     #[test]
     fn get_people_by_department_when_filled_with_sally() {
-        let mut people_by_department = HashMap::new();
-        people_by_department.insert("Sales".to_string(), vec!["Sally".to_string()]);
-        let company = Company {
-            people_by_department,
-        };
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
         assert_eq!(
             "- Sales : Sally",
             company.all_people_in_the_company_by_department()
@@ -77,12 +89,9 @@ mod test {
 
     #[test]
     fn get_people_by_department_when_filled_with_more_than_sally() {
-        let mut people_by_department = HashMap::new();
-        people_by_department.insert(
-            "Sales".to_string(),
-            vec!["Sally".to_string(), "Marc".to_string()],
-        );
-        let company = Company::new(people_by_department);
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
+        company.add_people("Marc", "Sales");
         assert_eq!(
             "- Sales : Marc, Sally",
             company.all_people_in_the_company_by_department()
@@ -91,16 +100,11 @@ mod test {
 
     #[test]
     fn get_people_by_department_when_filled_with_many_department() {
-        let mut people_by_department = HashMap::new();
-        people_by_department.insert(
-            "Sales".to_string(),
-            vec!["Sally".to_string(), "Marc".to_string()],
-        );
-        people_by_department.insert(
-            "Devs".to_string(),
-            vec!["Bill".to_string(), "Ned".to_string()],
-        );
-        let company = Company::new(people_by_department);
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
+        company.add_people("Marc", "Sales");
+        company.add_people("Bill", "Devs");
+        company.add_people("Ned", "Devs");
         assert_eq!(
             "- Devs : Bill, Ned\n- Sales : Marc, Sally",
             company.all_people_in_the_company_by_department()
@@ -109,17 +113,12 @@ mod test {
 
     #[test]
     fn get_people_by_department_are_sorted() {
-        let mut people_by_department = HashMap::new();
-        people_by_department.insert(
-            "Sales".to_string(),
-            vec!["Sally".to_string(), "Marc".to_string()],
-        );
-        people_by_department.insert(
-            "Devs".to_string(),
-            vec!["Bill".to_string(), "Ned".to_string()],
-        );
-        people_by_department.insert("Artisans".to_string(), vec!["Booby".to_string()]);
-        let company = Company::new(people_by_department);
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
+        company.add_people("Marc", "Sales");
+        company.add_people("Bill", "Devs");
+        company.add_people("Ned", "Devs");
+        company.add_people("Booby", "Artisans");
         assert_eq!(
             "- Artisans : Booby\n- Devs : Bill, Ned\n- Sales : Marc, Sally",
             company.all_people_in_the_company_by_department()
@@ -128,20 +127,50 @@ mod test {
 
     #[test]
     fn get_sales_people() {
-        let mut people_by_department = HashMap::new();
-        people_by_department.insert(
-            "Sales".to_string(),
-            vec!["Sally".to_string(), "Marc".to_string()],
-        );
-        people_by_department.insert(
-            "Devs".to_string(),
-            vec!["Bill".to_string(), "Ned".to_string()],
-        );
-
-        let company = Company::new(people_by_department);
-
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
+        company.add_people("Marc", "Sales");
+        company.add_people("Bill", "Devs");
+        company.add_people("Ned", "Devs");
         let result = company.get_by_department("Sales".to_string());
-
         assert_eq!("Marc, Sally", result)
+    }
+
+    #[test]
+    fn get_devs_people() {
+        let mut company = Company::new();
+        company.add_people("Sally", "Sales");
+        company.add_people("Marc", "Sales");
+        company.add_people("Bill", "Devs");
+        company.add_people("Ned", "Devs");
+        let result = company.get_by_department("Devs".to_string());
+        assert_eq!("Bill, Ned", result)
+    }
+
+    #[test]
+    fn guess_user() {
+        let user_input = "Add Amir to Sales";
+
+        let result = Company::parse_user_input(user_input);
+
+        assert_eq!(("Sales", "Amir"), result);
+    }
+
+    #[test]
+    fn guess_user_long_department() {
+        let user_input = "Add Amir to Human Resources";
+
+        let result = Company::parse_user_input(user_input);
+
+        assert_eq!(("Human Resources", "Amir"), result);
+    }
+
+    #[test]
+    fn guess_user_long_name() {
+        let user_input = "Add Paul Jean to Sales";
+
+        let result = Company::parse_user_input(user_input);
+
+        assert_eq!(("Sales", "Paul Jean"), result);
     }
 }
