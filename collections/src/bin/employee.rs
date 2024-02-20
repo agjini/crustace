@@ -1,10 +1,19 @@
 use std::collections::HashMap;
+use std::io;
 
 use regex;
 use regex::Match;
 
 fn main() {
-    let mut employees = vec!["Jean", "Marc", "Sally"];
+    println!("Wait a few minutes");
+
+    println!("Add an employee to a department : Add [name] to [Departments]");
+
+    let mut user_input = String::new();
+
+    io::stdin()
+        .read_line(&mut user_input)
+        .expect("Failed to read line");
 }
 
 struct Company {
@@ -16,6 +25,11 @@ impl Company {
         Self {
             people_by_department: HashMap::new(),
         }
+    }
+
+    pub fn exec_user_input(&mut self, user_input: &str) {
+        let (dept, name) = Company::parse_user_input(user_input);
+        self.add_people(name, dept)
     }
 
     pub fn add_people(&mut self, name: &str, department: &str) {
@@ -172,5 +186,52 @@ mod test {
         let result = Company::parse_user_input(user_input);
 
         assert_eq!(("Sales", "Paul Jean"), result);
+    }
+
+    #[test]
+    fn add_people_from_user_input() {
+        // Arrange
+        let mut company = Company::new();
+        let user_input = "Add Paul Jean to Sales";
+
+        // Action
+        company.exec_user_input(user_input);
+
+        // Assert
+        let sales = company.get_by_department("Sales".to_string());
+        assert_eq!("Paul Jean", sales)
+    }
+    #[test]
+    fn add_many_people_from_user_input() {
+        // Arrange
+        let mut company = Company::new();
+        let user_input = ["Add Paul Jean to Sales", "Add Jack² to Sales"];
+
+        // Action
+        for x in user_input.iter() {
+            company.exec_user_input(x);
+        }
+
+        // Assert
+        let sales = company.get_by_department("Sales".to_string());
+        assert_eq!("Jack², Paul Jean", sales)
+    }
+
+    #[test]
+    fn add_many_people_from_user_input_to_different_departments() {
+        // Arrange
+        let mut company = Company::new();
+        let user_input = ["Add Paul Jean to Sales", "Add Jack² to Human Resources"];
+
+        // Action
+        for x in user_input.iter() {
+            company.exec_user_input(x);
+        }
+
+        // Assert
+        let sales = company.get_by_department("Sales".to_string());
+        let human_resources = company.get_by_department("Human Resources".to_string());
+        assert_eq!("Jack²", human_resources);
+        assert_eq!("Paul Jean", sales);
     }
 }
