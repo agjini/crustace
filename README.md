@@ -21,3 +21,4 @@ Forme de la retrospective :
 
 - Présentation du moteur de jeu rust bevy (ECS)
 - Présentation du projet rotating plate
+- Présentation d'une application web en rust (jamin) : backend, cli (rust), frontend (next.js)
