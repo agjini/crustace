@@ -1,0 +1,12 @@
+Game of life
+
+Univers sans joueur
+Cellules
+tour par tour
+affichage grille
+voisin haut, bas, gauche, droite et les diagonales
+
+1. une cellule morte avec 3 voisins devient vivante
+2. une cellule vivante avec 2 ou 3 voisins reste vivante
+3. une cellule vivante a moins de 2 voisins elle meure
+4. une cellule vivante a plus de 3 voisins elle meure
