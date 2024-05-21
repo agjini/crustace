@@ -1,15 +1,22 @@
-use std::ops::Deref;
 use bevy::app::{Startup, Update};
-use bevy::prelude::{App, Assets, Camera2dBundle, Color, ColorMaterial, Commands, Component, default, IntoSystemConfigs, Mesh, Plugin, Query, Rectangle, Res, ResMut, Resource, Time, Timer, Transform, With};
+use bevy::input::keyboard::KeyboardInput;
+use bevy::input::ButtonInput;
+use bevy::prelude::{
+    default, App, Assets, Camera2dBundle, Color, ColorMaterial, Commands, Component,
+    IntoSystemConfigs, KeyCode, Mesh, Mut, Plugin, Query, Rectangle, Res, ResMut, Resource, Time,
+    Timer, Transform, With, Without,
+};
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy::time::TimerMode;
 use rand::random;
+use std::ops::Deref;
 
 pub struct PongPlugin;
 
 impl Plugin for PongPlugin {
     fn build(&self, app: &mut App) {
-            app.add_systems(Startup, add_paddle);
+        app.add_systems(Startup, add_paddle)
+            .add_systems(Update, move_paddle);
     }
 }
 
@@ -18,41 +25,82 @@ struct Position {
     x: f32,
     y: f32,
 }
+
+#[derive(Component)]
+struct Playground;
+
 #[derive(Component)]
 struct Paddle;
 
+#[derive(Component)]
+struct Right;
 
-// #[derive(Resource)]
-// struct GreetTimer(Timer);
+#[derive(Component)]
+struct Left;
 
-pub fn add_paddle(mut commands: Commands,
-                  mut meshes: ResMut<Assets<Mesh>>,
-                  mut materials: ResMut<Assets<ColorMaterial>>,)
-{   commands.spawn(Camera2dBundle::default());
-    commands.spawn((Paddle,Position { x: 0.0, y: 0.0 }));
+const WIDTH: f32 = 1024.0;
+const HEIGHT: f32 = 768.0;
+const PADDLE_WIDTH: f32 = 20.0;
+const PADDLE_HEIGHT: f32 = 100.0;
+const PADDLE_SPEED: f32 = 600.;
+
+pub fn add_paddle(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands.spawn(Camera2dBundle::default());
+
+    let mesh = Mesh2dHandle(meshes.add(Rectangle::new(PADDLE_WIDTH, PADDLE_HEIGHT)));
+    let material = materials.add(Color::rgb(0.0, 1.0, 0.0));
     commands.spawn((
-            Paddle,
-            Position { x: 100.0, y: 0.0 },
-            MaterialMesh2dBundle{
-                mesh: Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0))),
-                material: materials.add(Color::rgb(0.0, 1.0, 0.0)),
-                transform: Transform::from_xyz(
-            // Distribute shapes from -X_EXTENT/2 to +X_EXTENT/2.
-            0.0,
-            0.0,
-            0.0,
-        ),
-        ..default()}));
+        Playground,
+        MaterialMesh2dBundle {
+            mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
+            material: materials.add(Color::rgb(0.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(0.0, 0.0, -1.0),
+            ..default()
+        },
+    ));
+
+    commands.spawn((
+        Paddle,
+        Left,
+        MaterialMesh2dBundle {
+            mesh: mesh.clone(),
+            material: material.clone(),
+            transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH / 2., 0.0, 0.0),
+            ..default()
+        },
+    ));
+    commands.spawn((
+        Paddle,
+        Right,
+        MaterialMesh2dBundle {
+            mesh,
+            material,
+            transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH / 2., 0.0, 0.0),
+            ..default()
+        },
+    ));
 }
 
-// pub fn greet_people(time: Res<Time>,
-//                     mut timer: ResMut<GreetTimer>,
-//                     query: Query<&Name, With<Person>>) {
-//     // update our timer with the time elapsed since the last update
-//     // if that caused the timer to finish, we say hello to everyone
-//     if timer.0.tick(time.delta()).just_finished() {
-//         for name in &query {
-//             println!("hello {}!", name.0);
-//         }
-//     }
-// }
+fn move_paddle(
+    keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+    mut paddle_left: Query<&mut Transform, (With<Left>, Without<Right>)>,
+    mut paddle_right: Query<&mut Transform, (With<Right>, Without<Left>)>,
+) {
+    if keys.pressed(KeyCode::ArrowUp) {
+        paddle_right.single_mut().translation.y += PADDLE_SPEED * time.delta().as_secs_f32();
+    }
+    if keys.pressed(KeyCode::ArrowDown) {
+        paddle_right.single_mut().translation.y -= PADDLE_SPEED * time.delta().as_secs_f32();
+    }
+    if keys.pressed(KeyCode::KeyW) {
+        paddle_left.single_mut().translation.y += PADDLE_SPEED * time.delta().as_secs_f32();
+    }
+    if keys.pressed(KeyCode::KeyS) {
+        paddle_left.single_mut().translation.y -= PADDLE_SPEED * time.delta().as_secs_f32();
+    }
+}
