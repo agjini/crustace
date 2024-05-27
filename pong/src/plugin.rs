@@ -1,15 +1,10 @@
 use bevy::app::{Startup, Update};
-use bevy::input::keyboard::KeyboardInput;
 use bevy::input::ButtonInput;
 use bevy::prelude::{
-    default, App, Assets, Camera2dBundle, Color, ColorMaterial, Commands, Component,
-    IntoSystemConfigs, KeyCode, Mesh, Mut, Plugin, Query, Rectangle, Res, ResMut, Resource, Time,
-    Timer, Transform, With, Without,
+    default, App, Assets, Camera2dBundle, Color, ColorMaterial, Commands, Component, KeyCode, Mesh,
+    Plugin, Query, Rectangle, Res, ResMut, Time, Transform, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
-use bevy::time::TimerMode;
-use rand::random;
-use std::ops::Deref;
 
 pub struct PongPlugin;
 
@@ -18,12 +13,6 @@ impl Plugin for PongPlugin {
         app.add_systems(Startup, add_paddle)
             .add_systems(Update, move_paddle);
     }
-}
-
-#[derive(Component)]
-struct Position {
-    x: f32,
-    y: f32,
 }
 
 #[derive(Component)]
