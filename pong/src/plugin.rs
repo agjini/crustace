@@ -43,9 +43,11 @@ struct Left;
 
 const WIDTH: f32 = 1024.0;
 const HEIGHT: f32 = 768.0;
+const WALL_WIDTH: f32 = 2.0;
 const PADDLE_WIDTH: f32 = 20.0;
 const PADDLE_HEIGHT: f32 = 100.0;
 const PADDLE_SPEED: f32 = 600.;
+const MARGIN: f32 = 10.;
 
 pub fn add_playground(
     mut commands: Commands,
@@ -65,29 +67,41 @@ pub fn add_playground(
     ));
 
     commands.spawn((
-        Collider::cuboid(WIDTH / 2., 1.),
+        Collider::cuboid(WIDTH / 2., WALL_WIDTH),
         Wall,
-        TransformBundle::from(Transform::from_xyz(0., HEIGHT / 2., 0.0)),
+        TransformBundle::from(Transform::from_xyz(
+            0.,
+            HEIGHT / 2. + (WALL_WIDTH / 2.),
+            0.0,
+        )),
         RigidBody::Fixed,
     ));
 
     commands.spawn((
-        Collider::cuboid(WIDTH / 2., 1.),
+        Collider::cuboid(WIDTH / 2., WALL_WIDTH),
         Wall,
-        TransformBundle::from(Transform::from_xyz(0., -HEIGHT / 2., 0.0)),
+        TransformBundle::from(Transform::from_xyz(
+            0.,
+            -HEIGHT / 2. - (WALL_WIDTH / 2.),
+            0.0,
+        )),
         RigidBody::Fixed,
     ));
 
     commands.spawn((
-        Collider::cuboid(1., HEIGHT / 2.),
+        Collider::cuboid(WALL_WIDTH, HEIGHT / 2.),
         Wall,
-        TransformBundle::from(Transform::from_xyz(-WIDTH / 2., 0., 0.0)),
+        TransformBundle::from(Transform::from_xyz(
+            -WIDTH / 2. - (WALL_WIDTH / 2.),
+            0.,
+            0.0,
+        )),
         RigidBody::Fixed,
     ));
     commands.spawn((
-        Collider::cuboid(1., HEIGHT / 2.),
+        Collider::cuboid(WALL_WIDTH, HEIGHT / 2.),
         Wall,
-        TransformBundle::from(Transform::from_xyz(WIDTH / 2., 0., 0.0)),
+        TransformBundle::from(Transform::from_xyz(WIDTH / 2. + (WALL_WIDTH / 2.), 0., 0.0)),
         RigidBody::Fixed,
     ));
 }
@@ -125,7 +139,7 @@ pub fn add_paddle(
         MaterialMesh2dBundle {
             mesh: mesh.clone(),
             material: material.clone(),
-            transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH / 2., 0.0, 0.0),
+            transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH / 2. + MARGIN, 0.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
@@ -137,7 +151,7 @@ pub fn add_paddle(
         MaterialMesh2dBundle {
             mesh,
             material,
-            transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH / 2., 0.0, 0.0),
+            transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH / 2. - MARGIN, 0.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
