@@ -1,18 +1,15 @@
 use bevy::app::{Startup, Update};
-use bevy::input::ButtonInput;
-use bevy::math::Vec2;
-use bevy::prelude::{
-    default, App, Assets, Camera2dBundle, Circle, Color, ColorMaterial, Commands, Component,
-    KeyCode, Mesh, Plugin, Query, Rectangle, Res, ResMut, Transform, TransformBundle, With,
-    Without,
-};
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
+use bevy::prelude::{App, Plugin};
 use bevy_rapier2d::plugin::{NoUserData, RapierPhysicsPlugin};
-use bevy_rapier2d::prelude::ColliderMassProperties::Mass;
-use bevy_rapier2d::prelude::{
-    CoefficientCombineRule, Collider, ExternalImpulse, Friction, LockedAxes, RapierConfiguration,
-    RapierDebugRenderPlugin, Restitution, RigidBody, Velocity,
-};
+use bevy_rapier2d::prelude::RapierDebugRenderPlugin;
+
+use crate::plugin::ball::add_ball;
+use crate::plugin::paddle::{add_paddle, move_paddle};
+use crate::plugin::playground::add_playground;
+
+mod ball;
+mod paddle;
+mod playground;
 
 pub struct PongPlugin;
 
@@ -24,184 +21,5 @@ impl Plugin for PongPlugin {
             .add_systems(Startup, add_paddle)
             .add_systems(Startup, add_ball)
             .add_systems(Update, move_paddle);
-    }
-}
-
-#[derive(Component)]
-struct Playground;
-
-#[derive(Component)]
-struct Wall;
-
-#[derive(Component)]
-struct Paddle;
-
-#[derive(Component)]
-struct Right;
-
-#[derive(Component)]
-struct Left;
-
-const WIDTH: f32 = 1024.0;
-const HEIGHT: f32 = 768.0;
-const WALL_WIDTH: f32 = 100.0;
-const PADDLE_WIDTH: f32 = 20.0;
-const PADDLE_HEIGHT: f32 = 100.0;
-const PADDLE_SPEED: f32 = 600.;
-const MARGIN: f32 = 10.;
-
-pub fn add_playground(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut rapier_config: ResMut<RapierConfiguration>,
-) {
-    rapier_config.gravity = Vec2::ZERO;
-    commands.spawn(Camera2dBundle::default());
-
-    commands.spawn((
-        Playground,
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
-            material: materials.add(Color::rgb(0.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(0.0, 0.0, -1.0),
-            ..default()
-        },
-    ));
-
-    commands.spawn((
-        Collider::cuboid(WIDTH / 2., WALL_WIDTH),
-        Wall,
-        TransformBundle::from(Transform::from_xyz(0., HEIGHT / 2. + WALL_WIDTH, 0.0)),
-        RigidBody::Fixed,
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-    ));
-
-    commands.spawn((
-        Collider::cuboid(WIDTH / 2., WALL_WIDTH),
-        Wall,
-        TransformBundle::from(Transform::from_xyz(0., -HEIGHT / 2. - WALL_WIDTH, 0.0)),
-        RigidBody::Fixed,
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-    ));
-
-    commands.spawn((
-        Collider::cuboid(WALL_WIDTH, HEIGHT / 2.),
-        Wall,
-        TransformBundle::from(Transform::from_xyz(-WIDTH / 2. - WALL_WIDTH, 0., 0.0)),
-        RigidBody::Fixed,
-    ));
-    commands.spawn((
-        Collider::cuboid(WALL_WIDTH, HEIGHT / 2.),
-        Wall,
-        TransformBundle::from(Transform::from_xyz(WIDTH / 2. + WALL_WIDTH, 0., 0.0)),
-        RigidBody::Fixed,
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-    ));
-}
-
-pub fn add_ball(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let mesh = Mesh2dHandle(meshes.add(Circle::new(10.0)));
-    let material = materials.add(Color::rgb(1.0, 0.0, 0.0));
-    commands.spawn((
-        MaterialMesh2dBundle {
-            mesh,
-            material,
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        Collider::ball(10.0),
-        Restitution::new(2.0),
-        ExternalImpulse {
-            impulse: Vec2::new(50.0, 50.0),
-            torque_impulse: 0.0,
-        },
-        Mass(0.2),
-    ));
-}
-
-pub fn add_paddle(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let mesh = Mesh2dHandle(meshes.add(Rectangle::new(PADDLE_WIDTH, PADDLE_HEIGHT)));
-    let material = materials.add(Color::rgb(0.0, 1.0, 0.0));
-
-    commands.spawn((
-        Paddle,
-        Left,
-        MaterialMesh2dBundle {
-            mesh: mesh.clone(),
-            material: material.clone(),
-            transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH / 2. + MARGIN, 0.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Collider::cuboid(10.0, 50.0),
-        Velocity::zero(),
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
-    ));
-    commands.spawn((
-        Paddle,
-        Right,
-        MaterialMesh2dBundle {
-            mesh,
-            material,
-            transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH / 2. - MARGIN, 0.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Collider::cuboid(10.0, 50.0),
-        Velocity::zero(),
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
-    ));
-}
-
-fn move_paddle(
-    keys: Res<ButtonInput<KeyCode>>,
-    mut paddle_left: Query<&mut Velocity, (With<Left>, Without<Right>)>,
-    mut paddle_right: Query<&mut Velocity, (With<Right>, Without<Left>)>,
-) {
-    if keys.pressed(KeyCode::ArrowUp) {
-        paddle_right.single_mut().linvel = Vec2::Y * PADDLE_SPEED;
-    } else if keys.pressed(KeyCode::ArrowDown) {
-        paddle_right.single_mut().linvel = Vec2::NEG_Y * PADDLE_SPEED;
-    } else {
-        paddle_right.single_mut().linvel = Vec2::ZERO;
-    }
-
-    if keys.pressed(KeyCode::KeyW) {
-        paddle_left.single_mut().linvel = Vec2::Y * PADDLE_SPEED;
-    } else if keys.pressed(KeyCode::KeyS) {
-        paddle_left.single_mut().linvel = Vec2::NEG_Y * PADDLE_SPEED;
-    } else {
-        paddle_left.single_mut().linvel = Vec2::ZERO;
     }
 }
