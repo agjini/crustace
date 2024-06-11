@@ -6,6 +6,7 @@ use bevy_rapier2d::prelude::RapierDebugRenderPlugin;
 use crate::plugin::ball::add_ball;
 use crate::plugin::paddle::{add_paddle, move_paddle};
 use crate::plugin::playground::add_playground;
+use crate::plugin::score::compute_score;
 
 mod ball;
 mod paddle;
