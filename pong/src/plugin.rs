@@ -10,6 +10,7 @@ use crate::plugin::playground::add_playground;
 mod ball;
 mod paddle;
 mod playground;
+mod score;
 
 pub struct PongPlugin;
 
@@ -20,6 +21,7 @@ impl Plugin for PongPlugin {
             .add_systems(Startup, add_playground)
             .add_systems(Startup, add_paddle)
             .add_systems(Startup, add_ball)
-            .add_systems(Update, move_paddle);
+            .add_systems(Update, move_paddle)
+            .add_systems(Update, compute_score);
     }
 }

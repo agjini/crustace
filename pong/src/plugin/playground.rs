@@ -8,6 +8,7 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::RigidBody;
 use bevy_rapier2d::geometry::Collider;
 use bevy_rapier2d::plugin::RapierConfiguration;
+use bevy_rapier2d::prelude::Sensor;
 
 #[derive(Component)]
 struct Playground;
@@ -15,6 +16,7 @@ struct Playground;
 #[derive(Component)]
 struct Wall;
 
+#[derive(Eq, PartialEq)]
 enum Position {
     Top,
     Right,
@@ -70,10 +72,13 @@ fn spawn_wall(position: Position, commands: &mut Commands) {
         Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
     };
 
-    commands.spawn((
+    let mut wall = commands.spawn((
         Collider::cuboid(width / 2., height / 2.),
         Wall,
         TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
         RigidBody::Fixed,
     ));
+    if position == Position::Left || position == Position::Right {
+        wall.insert(Sensor);
+    }
 }
