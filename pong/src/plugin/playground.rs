@@ -8,10 +8,6 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::RigidBody;
 use bevy_rapier2d::geometry::Collider;
 use bevy_rapier2d::plugin::RapierConfiguration;
-use bevy_rapier2d::prelude::Sensor;
-
-#[derive(Component)]
-struct Playground;
 
 #[derive(Component)]
 struct Wall;
@@ -38,15 +34,12 @@ pub fn add_playground(
     rapier_config.gravity = Vec2::ZERO;
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn((
-        Playground,
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
-            material: materials.add(Color::rgb(0.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(0.0, 0.0, -1.0),
-            ..default()
-        },
-    ));
+    commands.spawn((MaterialMesh2dBundle {
+        mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
+        material: materials.add(Color::rgb(0.0, 0.0, 0.0)),
+        transform: Transform::from_xyz(0.0, 0.0, -1.0),
+        ..default()
+    },));
 
     spawn_wall(Position::Top, &mut commands);
     spawn_wall(Position::Right, &mut commands);
@@ -72,13 +65,10 @@ fn spawn_wall(position: Position, commands: &mut Commands) {
         Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
     };
 
-    let mut wall = commands.spawn((
+    commands.spawn((
         Collider::cuboid(width / 2., height / 2.),
         Wall,
         TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
         RigidBody::Fixed,
     ));
-    if position == Position::Left || position == Position::Right {
-        wall.insert(Sensor);
-    }
 }

@@ -8,6 +8,7 @@ use bevy::prelude::{
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::{CoefficientCombineRule, LockedAxes, RigidBody, Velocity};
 use bevy_rapier2d::geometry::{Collider, Friction};
+use bevy_rapier2d::prelude::Ccd;
 
 use crate::plugin::playground::{MARGIN, WIDTH};
 
@@ -49,6 +50,7 @@ pub fn add_paddle(
             combine_rule: CoefficientCombineRule::Multiply,
         },
         LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
+        Ccd::enabled(),
     ));
     commands.spawn((
         Paddle,
@@ -67,6 +69,7 @@ pub fn add_paddle(
             combine_rule: CoefficientCombineRule::Multiply,
         },
         LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
+        Ccd::enabled(),
     ));
 }
 
