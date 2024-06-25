@@ -1,19 +1,24 @@
+use crate::plugin::ball::{add_ball, Ball};
+use crate::plugin::AppState;
 use bevy::asset::Assets;
 use bevy::math::Vec2;
 use bevy::prelude::{
-    default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Mesh, Rectangle, ResMut,
-    Transform, TransformBundle,
+    default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Entity, EventReader, Mesh,
+    Mut, NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::RigidBody;
 use bevy_rapier2d::geometry::Collider;
 use bevy_rapier2d::plugin::RapierConfiguration;
+use bevy_rapier2d::prelude::{ActiveEvents, CollisionEvent, Sensor};
+
+use crate::plugin::paddle::{Left, Right};
 
 #[derive(Component)]
-struct Wall;
+pub(crate) struct Wall;
 
-#[derive(Eq, PartialEq)]
-enum Position {
+#[derive(Eq, PartialEq, Component, Clone, Copy)]
+pub enum Position {
     Top,
     Right,
     Bottom,
@@ -65,10 +70,43 @@ fn spawn_wall(position: Position, commands: &mut Commands) {
         Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
     };
 
-    commands.spawn((
+    let mut wall = commands.spawn((
         Collider::cuboid(width / 2., height / 2.),
         Wall,
         TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
         RigidBody::Fixed,
     ));
+    if position == Position::Left || position == Position::Right {
+        wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
+        match position {
+            Position::Left => wall.insert(Left),
+            Position::Right => wall.insert(Right),
+            _ => panic!("Invalid position"),
+        };
+    }
+}
+
+pub fn display_events(
+    mut commands: Commands,
+    mut collision_events: EventReader<CollisionEvent>,
+    wall_left: Query<Entity, (With<Wall>, With<Left>, Without<Right>)>,
+    wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
+    ball: Query<Entity, With<Ball>>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    for collision_event in collision_events.read() {
+        if let &CollisionEvent::Started(e1, e2, _) = collision_event {
+            if e1 == wall_left.single() || e2 == wall_left.single() {
+                println!("Collision with left wall => e2");
+                commands.entity(ball.single()).despawn();
+                next_state.set(AppState::Goal);
+            }
+            if e1 == wall_right.single() || e2 == wall_right.single() {
+                println!("Collision with right wall => e2");
+                commands.entity(ball.single()).despawn();
+                next_state.set(AppState::Goal);
+            }
+        }
+        // println!("Received collision event: {:?}", collision_event);
+    }
 }

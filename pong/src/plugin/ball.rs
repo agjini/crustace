@@ -1,14 +1,21 @@
+use crate::plugin::AppState;
 use bevy::asset::Assets;
 use bevy::math::Vec2;
-use bevy::prelude::{default, Circle, Color, ColorMaterial, Commands, Mesh, ResMut, Transform};
+use bevy::prelude::{
+    default, Circle, Color, ColorMaterial, Commands, Component, Mesh, NextState, ResMut, Transform,
+};
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::{CoefficientCombineRule, ExternalImpulse, RigidBody};
 use bevy_rapier2d::geometry::ColliderMassProperties::Mass;
 use bevy_rapier2d::geometry::{Collider, Friction, Restitution};
 use bevy_rapier2d::prelude::Ccd;
 use rand::Rng;
+use std::thread::sleep;
 
 const INITIAL_VELOCITY: f32 = 100.0;
+
+#[derive(Component)]
+pub(crate) struct Ball;
 
 pub fn add_ball(
     mut commands: Commands,
@@ -50,5 +57,10 @@ pub fn add_ball(
             torque_impulse: 0.0,
         },
         Mass(0.2),
+        Ball,
     ));
+}
+
+pub fn to_ingame(mut next_state: ResMut<NextState<AppState>>) {
+    next_state.set(AppState::InGame);
 }
