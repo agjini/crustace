@@ -1,10 +1,8 @@
-use crate::plugin::ball::{add_ball, Ball};
-use crate::plugin::AppState;
 use bevy::asset::Assets;
 use bevy::math::Vec2;
 use bevy::prelude::{
     default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Entity, EventReader, Mesh,
-    Mut, NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
+    NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier2d::dynamics::RigidBody;
@@ -12,7 +10,10 @@ use bevy_rapier2d::geometry::Collider;
 use bevy_rapier2d::plugin::RapierConfiguration;
 use bevy_rapier2d::prelude::{ActiveEvents, CollisionEvent, Sensor};
 
+use crate::plugin::ball::Ball;
 use crate::plugin::paddle::{Left, Right};
+use crate::plugin::score::Score;
+use crate::plugin::AppState;
 
 #[derive(Component)]
 pub(crate) struct Wall;
@@ -91,6 +92,8 @@ pub fn display_events(
     mut collision_events: EventReader<CollisionEvent>,
     wall_left: Query<Entity, (With<Wall>, With<Left>, Without<Right>)>,
     wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
+    mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
+    mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
     ball: Query<Entity, With<Ball>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
@@ -99,11 +102,13 @@ pub fn display_events(
             if e1 == wall_left.single() || e2 == wall_left.single() {
                 println!("Collision with left wall => e2");
                 commands.entity(ball.single()).despawn();
+                score_right.single_mut().0 += 1;
                 next_state.set(AppState::Goal);
             }
             if e1 == wall_right.single() || e2 == wall_right.single() {
                 println!("Collision with right wall => e2");
                 commands.entity(ball.single()).despawn();
+                score_left.single_mut().0 += 1;
                 next_state.set(AppState::Goal);
             }
         }

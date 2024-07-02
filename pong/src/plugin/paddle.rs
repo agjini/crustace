@@ -11,6 +11,7 @@ use bevy_rapier2d::geometry::{Collider, Friction};
 use bevy_rapier2d::prelude::Ccd;
 
 use crate::plugin::playground::{MARGIN, WIDTH};
+use crate::plugin::score::Score;
 
 const PADDLE_WIDTH: f32 = 20.0;
 const PADDLE_HEIGHT: f32 = 100.0;
