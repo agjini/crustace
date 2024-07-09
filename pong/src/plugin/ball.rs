@@ -11,9 +11,9 @@ use bevy_rapier2d::prelude::Ccd;
 use rand::Rng;
 
 const INITIAL_VELOCITY: f32 = 100.0;
-
+const BALL_RADIUS : f32 = 20.0;
 #[derive(Component)]
-pub(crate) struct Ball;
+pub(crate) struct PongBall;
 
 pub fn add_ball(
     mut commands: Commands,
@@ -21,7 +21,7 @@ pub fn add_ball(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let mut rng = rand::thread_rng();
-    let mesh = Mesh2dHandle(meshes.add(Circle::new(10.0)));
+    let mesh = Mesh2dHandle(meshes.add(Circle::new(BALL_RADIUS)));
     let material = materials.add(Color::rgb(1.0, 0.0, 0.0));
     let max_angle = std::f32::consts::PI / 4.;
     let mut angle: f32 = rng.gen_range(-max_angle..=max_angle);
@@ -42,7 +42,7 @@ pub fn add_ball(
             coefficient: 0.,
             combine_rule: CoefficientCombineRule::Multiply,
         },
-        Collider::ball(10.0),
+        Collider::ball(BALL_RADIUS),
         Restitution {
             coefficient: 1.0,
             combine_rule: CoefficientCombineRule::Max,
@@ -55,6 +55,6 @@ pub fn add_ball(
             torque_impulse: 0.0,
         },
         Mass(0.2),
-        Ball,
+        PongBall,
     ));
 }

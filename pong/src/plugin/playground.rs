@@ -1,7 +1,7 @@
 use bevy::asset::Assets;
 use bevy::math::Vec2;
 use bevy::prelude::{
-    default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Entity, EventReader, Mesh,
+    Camera2dBundle, Color, ColorMaterial, Commands, Component, default, Entity, EventReader, Mesh,
     NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -10,10 +10,10 @@ use bevy_rapier2d::geometry::Collider;
 use bevy_rapier2d::plugin::RapierConfiguration;
 use bevy_rapier2d::prelude::{ActiveEvents, CollisionEvent, Sensor};
 
-use crate::plugin::ball::Ball;
+use crate::plugin::AppState;
+use crate::plugin::ball::PongBall;
 use crate::plugin::paddle::{Left, Right};
 use crate::plugin::score::Score;
-use crate::plugin::AppState;
 
 #[derive(Component)]
 pub(crate) struct Wall;
@@ -94,7 +94,7 @@ pub fn display_events(
     wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
     mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
     mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
-    ball: Query<Entity, With<Ball>>,
+    ball: Query<Entity, With<PongBall>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     for collision_event in collision_events.read() {

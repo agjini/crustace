@@ -1,8 +1,6 @@
 use bevy::input::ButtonInput;
-use bevy::prelude::{
-    default, Commands, Component, Entity, JustifyText, KeyCode, NextState, PositionType, Query,
-    Res, ResMut, Style, TextBundle, TextStyle, Val, With,
-};
+use bevy::input::gamepad::GamepadButtonInput;
+use bevy::prelude::{default, Commands, Component, Entity, JustifyText, KeyCode, NextState, PositionType, Query, Res, ResMut, Style, TextBundle, TextStyle, Val, With, EventReader};
 
 use crate::plugin::AppState;
 
@@ -30,8 +28,14 @@ pub fn display_action(mut commands: Commands) {
     ));
 }
 
-pub fn kickoff(keys: Res<ButtonInput<KeyCode>>, mut next_state: ResMut<NextState<AppState>>) {
+pub fn kickoff(
+    keys: Res<ButtonInput<KeyCode>>, 
+    mut next_state: ResMut<NextState<AppState>>,
+    mut gamepad_button: EventReader<GamepadButtonInput>) {
     if keys.just_pressed(KeyCode::Space) {
+        next_state.set(AppState::InGame);
+    }
+    for _ in gamepad_button.read() {
         next_state.set(AppState::InGame);
     }
 }
