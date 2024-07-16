@@ -1,19 +1,19 @@
 use bevy::asset::Assets;
-use bevy::math::Vec2;
+use bevy::math::Vec3;
 use bevy::prelude::{
-    Camera2dBundle, Color, ColorMaterial, Commands, Component, default, Entity, EventReader, Mesh,
+    default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Entity, EventReader, Mesh,
     NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
-use bevy_rapier2d::dynamics::RigidBody;
-use bevy_rapier2d::geometry::Collider;
-use bevy_rapier2d::plugin::RapierConfiguration;
-use bevy_rapier2d::prelude::{ActiveEvents, CollisionEvent, Sensor};
+use bevy_rapier3d::dynamics::RigidBody;
+use bevy_rapier3d::geometry::Collider;
+use bevy_rapier3d::plugin::RapierConfiguration;
+use bevy_rapier3d::prelude::{CollisionEvent, Friction};
 
-use crate::plugin::AppState;
-use crate::plugin::ball::PongBall;
 use crate::plugin::paddle::{Left, Right};
+use crate::plugin::puck::Puck;
 use crate::plugin::score::Score;
+use crate::plugin::AppState;
 
 #[derive(Component)]
 pub(crate) struct Wall;
@@ -37,15 +37,19 @@ pub fn add_playground(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut rapier_config: ResMut<RapierConfiguration>,
 ) {
-    rapier_config.gravity = Vec2::ZERO;
+    rapier_config.gravity = Vec3::NEG_Z;
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn((MaterialMesh2dBundle {
-        mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
-        material: materials.add(Color::rgb(0.0, 0.0, 0.0)),
-        transform: Transform::from_xyz(0.0, 0.0, -1.0),
-        ..default()
-    },));
+    commands.spawn((
+        MaterialMesh2dBundle {
+            mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
+            material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(0.0, 0.0, -50.0),
+            ..default()
+        },
+        Friction::new(1.),
+        Collider::cuboid(WIDTH, HEIGHT, 1.),
+    ));
 
     spawn_wall(Position::Top, &mut commands);
     spawn_wall(Position::Right, &mut commands);
@@ -72,13 +76,13 @@ fn spawn_wall(position: Position, commands: &mut Commands) {
     };
 
     let mut wall = commands.spawn((
-        Collider::cuboid(width / 2., height / 2.),
+        Collider::cuboid(width / 2., height / 2., 1.),
         Wall,
         TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
         RigidBody::Fixed,
     ));
     if position == Position::Left || position == Position::Right {
-        wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
+        //wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
         match position {
             Position::Left => wall.insert(Left),
             Position::Right => wall.insert(Right),
@@ -94,7 +98,7 @@ pub fn display_events(
     wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
     mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
     mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
-    ball: Query<Entity, With<PongBall>>,
+    ball: Query<Entity, With<Puck>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     for collision_event in collision_events.read() {
