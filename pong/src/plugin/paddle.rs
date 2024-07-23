@@ -98,8 +98,8 @@ pub fn move_paddle(
         // };
 
         let direction = match button_type {
-            GamepadButtonType::DPadUp => Vec3::Y,
-            GamepadButtonType::DPadDown => Vec3::NEG_Y,
+            GamepadButtonType::DPadUp => Vec3::Z,
+            GamepadButtonType::DPadDown => Vec3::NEG_Z,
             _ => continue,
         };
 
@@ -125,17 +125,17 @@ pub fn move_paddle(
     }
 
     if keys.pressed(KeyCode::ArrowUp) {
-        paddle_right.single_mut().linvel = Vec3::Y * PADDLE_SPEED;
+        paddle_right.single_mut().linvel = Vec3::Z * PADDLE_SPEED;
     } else if keys.pressed(KeyCode::ArrowDown) {
-        paddle_right.single_mut().linvel = Vec3::NEG_Y * PADDLE_SPEED;
+        paddle_right.single_mut().linvel = Vec3::NEG_Z * PADDLE_SPEED;
     } else if keys.just_released(KeyCode::ArrowUp) || keys.just_released(KeyCode::ArrowDown) {
         paddle_right.single_mut().linvel = Vec3::ZERO;
     }
 
     if keys.pressed(KeyCode::KeyW) {
-        paddle_left.single_mut().linvel = Vec3::Y * PADDLE_SPEED;
+        paddle_left.single_mut().linvel = Vec3::Z * PADDLE_SPEED;
     } else if keys.pressed(KeyCode::KeyS) {
-        paddle_left.single_mut().linvel = Vec3::NEG_Y * PADDLE_SPEED;
+        paddle_left.single_mut().linvel = Vec3::NEG_Z * PADDLE_SPEED;
     } else if keys.just_released(KeyCode::KeyW) || keys.just_released(KeyCode::KeyS) {
         paddle_left.single_mut().linvel = Vec3::ZERO;
     }
