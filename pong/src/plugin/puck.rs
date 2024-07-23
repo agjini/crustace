@@ -1,14 +1,16 @@
 use bevy::asset::Assets;
+use bevy::core::Name;
+use bevy::math::Quat;
 use bevy::prelude::{
-    default, Color, ColorMaterial, Commands, Component, Cylinder, MaterialMeshBundle, Mesh, ResMut,
+    default, Color, Commands, Component, Cylinder, MaterialMeshBundle, Mesh, ResMut,
     StandardMaterial, Transform, Vec3,
 };
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier3d::dynamics::{CoefficientCombineRule, ExternalImpulse, RigidBody};
 use bevy_rapier3d::geometry::ColliderMassProperties::Mass;
 use bevy_rapier3d::geometry::{Collider, Friction, Restitution};
 use bevy_rapier3d::prelude::{Ccd, Vect};
 use rand::Rng;
+use std::f32::consts::PI;
 
 const INITIAL_VELOCITY: f32 = 100.0;
 const PUCK_RADIUS: f32 = 20.0;
@@ -32,10 +34,12 @@ pub fn add_puck(
         angle += std::f32::consts::PI;
     }
     commands.spawn((
+        Name::new("PUCK"),
         MaterialMeshBundle {
             mesh,
             material,
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                .with_rotation(Quat::from_axis_angle(Vec3::Z, PI / 2.0)),
             ..default()
         },
         RigidBody::Dynamic,
@@ -49,14 +53,14 @@ pub fn add_puck(
             coefficient: 1.0,
             combine_rule: CoefficientCombineRule::Max,
         },
-        ExternalImpulse {
-            impulse: Vec3::new(
-                INITIAL_VELOCITY * f32::cos(angle),
-                INITIAL_VELOCITY * f32::sin(angle),
-                0.0,
-            ),
-            torque_impulse: Vect::ZERO,
-        },
+        // ExternalImpulse {
+        //     impulse: Vec3::new(
+        //         INITIAL_VELOCITY * f32::cos(angle),
+        //         INITIAL_VELOCITY * f32::sin(angle),
+        //         0.0,
+        //     ),
+        //     torque_impulse: Vect::ZERO,
+        // },
         Mass(0.2),
         Puck,
     ));

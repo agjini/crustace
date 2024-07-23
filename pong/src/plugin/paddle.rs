@@ -1,11 +1,11 @@
 use bevy::asset::Assets;
 use bevy::input::gamepad::GamepadButtonInput;
 use bevy::input::{ButtonInput, ButtonState};
+use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Circle, Color, ColorMaterial, Commands, Component, EventReader, GamepadButtonType,
-    KeyCode, Mesh, Name, Query, Res, ResMut, Transform, Vec3, With, Without,
+    default, Color, Commands, Component, EventReader, GamepadButtonType, KeyCode, Mesh, Name,
+    Query, Res, ResMut, Transform, Vec3, With, Without,
 };
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier3d::dynamics::{CoefficientCombineRule, LockedAxes, RigidBody, Velocity};
 use bevy_rapier3d::geometry::{Collider, Friction};
 use bevy_rapier3d::prelude::Ccd;
@@ -27,25 +27,26 @@ pub struct Left;
 pub fn add_paddle(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // let mesh = Mesh2dHandle(meshes.add(Rectangle::new(PADDLE_WIDTH, PADDLE_HEIGHT)));
-    let mesh = Mesh2dHandle(meshes.add(Circle::new(PADDLE_WIDTH)));
+    const PADDLE_HEIGHT: f32 = 10.0;
+    const PADDLE_RADIUS: f32 = 20.0;
+    let paddle_collider = Collider::cylinder(PADDLE_HEIGHT, PADDLE_RADIUS);
+    let mesh = meshes.add(bevy::prelude::Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
     let material = materials.add(Color::srgb(0.0, 1.0, 0.0));
 
     commands.spawn((
         Name::new("Left Paddle"),
         Paddle,
         Left,
-        MaterialMesh2dBundle {
+        MaterialMeshBundle {
             mesh: mesh.clone(),
             material: material.clone(),
             transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH + MARGIN, 0.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        // Collider::cuboid(PADDLE_WIDTH/2., PADDLE_HEIGHT/2.),
-        Collider::ball(PADDLE_WIDTH),
+        paddle_collider.clone(),
         Velocity::zero(),
         Friction {
             coefficient: 0.,
@@ -58,15 +59,14 @@ pub fn add_paddle(
         Name::new("Right Paddle"),
         Paddle,
         Right,
-        MaterialMesh2dBundle {
+        MaterialMeshBundle {
             mesh,
             material,
             transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH - MARGIN, 0.0, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        // Collider::cuboid(PADDLE_WIDTH/2., PADDLE_HEIGHT/2.),
-        Collider::ball(PADDLE_WIDTH),
+        paddle_collider.clone(),
         Velocity::zero(),
         Friction {
             coefficient: 0.,

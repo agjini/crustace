@@ -1,12 +1,16 @@
+use bevy::asset::io::memory::Value::Vec;
 use bevy::asset::Assets;
-use bevy::math::Vec3;
+use bevy::core::Name;
+use bevy::math::{Quat, Vec3};
 use bevy::prelude::{
-    default, Camera2dBundle, Color, ColorMaterial, Commands, Component, Entity, EventReader, Mesh,
-    NextState, Query, Rectangle, ResMut, Transform, TransformBundle, With, Without,
+    default, AmbientLight, Camera2dBundle, Camera3dBundle, Color, ColorMaterial, Commands,
+    Component, Entity, EventReader, Mesh, NextState, Query, Rectangle, ResMut, Transform,
+    TransformBundle, With, Without,
 };
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_rapier3d::dynamics::RigidBody;
 use bevy_rapier3d::geometry::Collider;
+use bevy_rapier3d::na::Rotation3;
 use bevy_rapier3d::plugin::RapierConfiguration;
 use bevy_rapier3d::prelude::{CollisionEvent, Friction};
 
@@ -18,7 +22,7 @@ use crate::plugin::AppState;
 #[derive(Component)]
 pub(crate) struct Wall;
 
-#[derive(Eq, PartialEq, Component, Clone, Copy)]
+#[derive(Debug, Eq, PartialEq, Component, Clone, Copy)]
 pub enum Position {
     Top,
     Right,
@@ -37,10 +41,18 @@ pub fn add_playground(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut rapier_config: ResMut<RapierConfiguration>,
 ) {
-    rapier_config.gravity = Vec3::NEG_Z;
-    commands.spawn(Camera2dBundle::default());
-
+    rapier_config.gravity = Vec3::new(0., 0., -9.8);
+    commands.spawn(Camera3dBundle {
+        transform: Transform::from_xyz(0., -2000., 2000.).looking_at(Vec3::ZERO, Vec3::Z),
+        ..default()
+    });
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 1.0,
+        ..default()
+    });
     commands.spawn((
+        Name::new("PLAYGROUND"),
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(meshes.add(Rectangle::new(WIDTH, HEIGHT))),
             material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
@@ -76,6 +88,7 @@ fn spawn_wall(position: Position, commands: &mut Commands) {
     };
 
     let mut wall = commands.spawn((
+        Name::new(format!("WALL {position:?}")),
         Collider::cuboid(width / 2., height / 2., 1.),
         Wall,
         TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
