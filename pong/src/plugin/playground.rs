@@ -1,18 +1,13 @@
-use bevy::asset::io::memory::Value::Vec;
 use bevy::asset::Assets;
 use bevy::core::Name;
-use bevy::math::{Quat, Vec2, Vec3};
+use bevy::math::{Vec2, Vec3};
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
-    default, AmbientLight, Camera2dBundle, Camera3dBundle, Color, ColorMaterial, Commands,
-    Component, Cuboid, Entity, EventReader, MaterialMeshBundle, Mesh, NextState, Plane3d, Query,
-    Rectangle, ResMut, Transform, TransformBundle, With, Without,
+    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, Entity, EventReader,
+    MaterialMeshBundle, Mesh, NextState, Plane3d, Query, ResMut, Transform, With, Without,
 };
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
-use bevy_rapier3d::dynamics::RigidBody;
+use bevy_rapier3d::dynamics::{Ccd, RigidBody};
 use bevy_rapier3d::geometry::Collider;
-use bevy_rapier3d::na::Rotation3;
-use bevy_rapier3d::plugin::RapierConfiguration;
 use bevy_rapier3d::prelude::{CollisionEvent, Friction};
 
 use crate::plugin::paddle::{Left, Right};
@@ -42,7 +37,7 @@ pub fn add_playground(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0., 2000., -2000.).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0., 1000., -1000.).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
     commands.insert_resource(AmbientLight {
@@ -60,13 +55,14 @@ pub fn add_playground(
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
-        Friction::new(1.),
-        Collider::cuboid(WIDTH, 1., HEIGHT),
+        Friction::new(0.),
+        Ccd::enabled(),
+        Collider::cuboid(WIDTH / 2., 0., HEIGHT / 2.),
     ));
 
     spawn_wall(Position::Top, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
     spawn_wall(Position::Bottom, &mut commands, &mut meshes, &mut materials);
+    spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
     spawn_wall(Position::Left, &mut commands, &mut meshes, &mut materials);
 }
 
@@ -93,16 +89,17 @@ fn spawn_wall(
         Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
     };
 
-    let mesh = meshes.add(Cuboid::new(width / 2., 50., height / 2.));
+    let mesh = meshes.add(Cuboid::new(width, 50., height));
     let mut wall = commands.spawn((
         Name::new(format!("WALL {position:?}")),
         MaterialMeshBundle {
             mesh,
-            material: materials.add(Color::srgb(0.5, 0.5, 0.5)),
-            transform: Transform::from_xyz(x, 0.0, z),
+            material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(x, 25., z),
             ..default()
         },
-        Collider::cuboid(width / 2., 1., height / 2.),
+        Collider::cuboid(width / 2., 50. / 2., height / 2.),
+        Ccd::enabled(),
         Wall,
         RigidBody::Fixed,
     ));

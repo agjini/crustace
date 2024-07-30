@@ -1,6 +1,5 @@
 use bevy::asset::Assets;
 use bevy::core::Name;
-use bevy::math::Quat;
 use bevy::prelude::{
     default, Color, Commands, Component, Cylinder, MaterialMeshBundle, Mesh, ResMut,
     StandardMaterial, Transform, Vec3,
@@ -8,13 +7,12 @@ use bevy::prelude::{
 use bevy_rapier3d::dynamics::{CoefficientCombineRule, ExternalImpulse, RigidBody};
 use bevy_rapier3d::geometry::ColliderMassProperties::Mass;
 use bevy_rapier3d::geometry::{Collider, Friction, Restitution};
-use bevy_rapier3d::prelude::{Ccd, Vect};
+use bevy_rapier3d::prelude::{Ccd, LockedAxes, Vect};
 use rand::Rng;
-use std::f32::consts::PI;
 
-const INITIAL_VELOCITY: f32 = 100.0;
+const INITIAL_VELOCITY: f32 = 1000.0;
 const PUCK_RADIUS: f32 = 20.0;
-const PUCK_HEIGHT: f32 = 5.0;
+const PUCK_HEIGHT: f32 = 10.0;
 
 #[derive(Component)]
 pub(crate) struct Puck;
@@ -26,7 +24,7 @@ pub fn add_puck(
 ) {
     let mut rng = rand::thread_rng();
     let mesh = meshes.add(Cylinder::new(PUCK_RADIUS, PUCK_HEIGHT));
-    let material = materials.add(Color::srgb(1.0, 0.0, 0.0));
+    let material = materials.add(Color::srgb(0.0, 0.0, 0.7));
     let max_angle = std::f32::consts::PI / 4.;
     let mut angle: f32 = rng.gen_range(-max_angle..=max_angle);
     let start_left = rng.gen_bool(0.5);
@@ -35,33 +33,30 @@ pub fn add_puck(
     }
     commands.spawn((
         Name::new("PUCK"),
+        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_Y,
         MaterialMeshBundle {
             mesh,
             material,
-            transform: Transform::from_xyz(0.0, 0.0, 0.0)
-                .with_rotation(Quat::from_axis_angle(Vec3::Z, PI / 2.0)),
+            transform: Transform::from_xyz(0.0, PUCK_HEIGHT / 2., 0.0),
             ..default()
         },
         RigidBody::Dynamic,
         Ccd::enabled(),
         Friction {
-            coefficient: 1.,
+            coefficient: 0.,
             combine_rule: CoefficientCombineRule::Multiply,
         },
         Collider::cylinder(PUCK_HEIGHT / 2., PUCK_RADIUS),
-        Restitution {
-            coefficient: 1.0,
-            combine_rule: CoefficientCombineRule::Max,
+        Restitution::default(),
+        ExternalImpulse {
+            impulse: Vec3::new(
+                INITIAL_VELOCITY * f32::cos(angle),
+                0.0,
+                INITIAL_VELOCITY * f32::sin(angle),
+            ),
+            torque_impulse: Vect::ZERO,
         },
-        // ExternalImpulse {
-        //     impulse: Vec3::new(
-        //         INITIAL_VELOCITY * f32::cos(angle),
-        //         INITIAL_VELOCITY * f32::sin(angle),
-        //         0.0,
-        //     ),
-        //     torque_impulse: Vect::ZERO,
-        // },
-        Mass(0.2),
+        Mass(10.),
         Puck,
     ));
 }
