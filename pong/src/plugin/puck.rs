@@ -1,16 +1,16 @@
+use avian3d::prelude::Restitution;
+use avian3d::prelude::{
+    CoefficientCombine, Collider, ExternalImpulse, Friction, LockedAxes, Mass, RigidBody,
+};
 use bevy::asset::Assets;
 use bevy::core::Name;
 use bevy::prelude::{
     default, Color, Commands, Component, Cylinder, MaterialMeshBundle, Mesh, ResMut,
     StandardMaterial, Transform, Vec3,
 };
-use bevy_rapier3d::dynamics::{CoefficientCombineRule, ExternalImpulse, RigidBody};
-use bevy_rapier3d::geometry::ColliderMassProperties::Mass;
-use bevy_rapier3d::geometry::{Collider, Friction, Restitution};
-use bevy_rapier3d::prelude::{Ccd, LockedAxes, Vect};
 use rand::Rng;
 
-const INITIAL_VELOCITY: f32 = 1000.0;
+const INITIAL_VELOCITY: f32 = 10000000.0;
 const PUCK_RADIUS: f32 = 20.0;
 const PUCK_HEIGHT: f32 = 10.0;
 
@@ -33,30 +33,27 @@ pub fn add_puck(
     }
     commands.spawn((
         Name::new("PUCK"),
-        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_Y,
+        LockedAxes::new()
+            .lock_rotation_x()
+            .lock_rotation_y()
+            .lock_rotation_z()
+            .lock_translation_y(),
         MaterialMeshBundle {
             mesh,
             material,
-            transform: Transform::from_xyz(0.0, PUCK_HEIGHT / 2., 0.0),
+            transform: Transform::from_xyz(0.0, PUCK_HEIGHT, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
-        Ccd::enabled(),
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        Collider::cylinder(PUCK_HEIGHT / 2., PUCK_RADIUS),
-        Restitution::default(),
-        ExternalImpulse {
-            impulse: Vec3::new(
-                INITIAL_VELOCITY * f32::cos(angle),
-                0.0,
-                INITIAL_VELOCITY * f32::sin(angle),
-            ),
-            torque_impulse: Vect::ZERO,
-        },
-        Mass(10.),
+        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+        Collider::cylinder(PUCK_RADIUS, PUCK_HEIGHT),
+        ExternalImpulse::new(Vec3::new(
+            INITIAL_VELOCITY * f32::cos(angle),
+            0.0,
+            INITIAL_VELOCITY * f32::sin(angle),
+        )),
+        Mass(1.),
+        Restitution::new(1.0).with_combine_rule(CoefficientCombine::Max),
         Puck,
     ));
 }

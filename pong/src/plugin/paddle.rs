@@ -1,14 +1,12 @@
+use avian3d::prelude::{Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody};
 use bevy::asset::Assets;
 use bevy::input::gamepad::GamepadButtonInput;
 use bevy::input::{ButtonInput, ButtonState};
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, EventReader, GamepadButtonType, KeyCode, Mesh, Name,
-    Query, Res, ResMut, Transform, Vec3, With, Without,
+    default, Color, Commands, Component, EventReader, Gamepad, GamepadButtonType, KeyCode, Mesh,
+    Name, Query, Res, ResMut, Transform, Vec3, With, Without,
 };
-use bevy_rapier3d::dynamics::{CoefficientCombineRule, LockedAxes, RigidBody, Velocity};
-use bevy_rapier3d::geometry::{Collider, Friction};
-use bevy_rapier3d::prelude::Ccd;
 
 use crate::plugin::playground::{MARGIN, WIDTH};
 
@@ -31,12 +29,12 @@ pub fn add_paddle(
 ) {
     const PADDLE_HEIGHT: f32 = 10.0;
     const PADDLE_RADIUS: f32 = 20.0;
-    let paddle_collider = Collider::cylinder(PADDLE_HEIGHT, PADDLE_RADIUS);
+    let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
     let mesh = meshes.add(bevy::prelude::Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
     let material = materials.add(Color::srgb(0.0, 1.0, 0.0));
 
     commands.spawn((
-        Name::new("Left Paddle"),
+        Name::new("PADDLE Left"),
         Paddle,
         Left,
         MaterialMeshBundle {
@@ -47,16 +45,17 @@ pub fn add_paddle(
         },
         RigidBody::Dynamic,
         paddle_collider.clone(),
-        Velocity::zero(),
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
-        Ccd::enabled(),
+        Friction::new(0.),
+        LockedAxes::new()
+            .lock_rotation_x()
+            .lock_rotation_y()
+            .lock_rotation_z()
+            .lock_translation_x()
+            .lock_translation_y(),
+        Restitution::new(0.0).with_combine_rule(avian3d::prelude::CoefficientCombine::Min),
     ));
     commands.spawn((
-        Name::new("Right Paddle"),
+        Name::new("PADDLE Right"),
         Paddle,
         Right,
         MaterialMeshBundle {
@@ -67,13 +66,14 @@ pub fn add_paddle(
         },
         RigidBody::Dynamic,
         paddle_collider.clone(),
-        Velocity::zero(),
-        Friction {
-            coefficient: 0.,
-            combine_rule: CoefficientCombineRule::Multiply,
-        },
-        LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_X,
-        Ccd::enabled(),
+        Friction::new(0.),
+        LockedAxes::new()
+            .lock_rotation_x()
+            .lock_rotation_y()
+            .lock_rotation_z()
+            .lock_translation_x()
+            .lock_translation_y(),
+        Restitution::new(0.0).with_combine_rule(avian3d::prelude::CoefficientCombine::Min),
     ));
 }
 
@@ -81,8 +81,8 @@ pub fn move_paddle(
     mut gamepad_button: EventReader<GamepadButtonInput>,
     //mut gamepad_axis: EventReader<GamepadAxisChangedEvent>,
     keys: Res<ButtonInput<KeyCode>>,
-    mut paddle_left: Query<&mut Velocity, (With<Left>, Without<Right>)>,
-    mut paddle_right: Query<&mut Velocity, (With<Right>, Without<Left>)>,
+    mut paddle_left: Query<&mut LinearVelocity, (With<Paddle>, With<Left>, Without<Right>)>,
+    mut paddle_right: Query<&mut LinearVelocity, (With<Paddle>, With<Right>, Without<Left>)>,
 ) {
     for ev in gamepad_button.read() {
         println!("{:?}", ev);
@@ -106,37 +106,37 @@ pub fn move_paddle(
         match state {
             ButtonState::Pressed => {
                 println!("{:?}", button_type);
-                // paddle.single_mut().linvel = direction * PADDLE_SPEED;
+                // paddle.single_mut().0 = direction * PADDLE_SPEED;
                 match gamepad_id {
-                    0 => paddle_left.single_mut().linvel = direction * PADDLE_SPEED,
-                    1 => paddle_right.single_mut().linvel = direction * PADDLE_SPEED,
+                    0 => paddle_left.single_mut().0 = direction * PADDLE_SPEED,
+                    1 => paddle_right.single_mut().0 = direction * PADDLE_SPEED,
                     _ => continue,
                 }
             }
             ButtonState::Released => {
-                // paddle.single_mut().linvel = Vec2::ZERO;
+                // paddle.single_mut().0 = Vec2::ZERO;
                 match gamepad_id {
-                    0 => paddle_left.single_mut().linvel = Vec3::ZERO,
-                    1 => paddle_right.single_mut().linvel = Vec3::ZERO,
+                    0 => paddle_left.single_mut().0 = Vec3::ZERO,
+                    1 => paddle_right.single_mut().0 = Vec3::ZERO,
                     _ => continue,
                 }
             }
         }
     }
 
-    if keys.pressed(KeyCode::ArrowUp) {
-        paddle_right.single_mut().linvel = Vec3::Z * PADDLE_SPEED;
-    } else if keys.pressed(KeyCode::ArrowDown) {
-        paddle_right.single_mut().linvel = Vec3::NEG_Z * PADDLE_SPEED;
+    if keys.just_pressed(KeyCode::ArrowUp) {
+        paddle_right.single_mut().0 = Vec3::Z * PADDLE_SPEED;
+    } else if keys.just_pressed(KeyCode::ArrowDown) {
+        paddle_right.single_mut().0 = Vec3::NEG_Z * PADDLE_SPEED;
     } else if keys.just_released(KeyCode::ArrowUp) || keys.just_released(KeyCode::ArrowDown) {
-        paddle_right.single_mut().linvel = Vec3::ZERO;
+        paddle_right.single_mut().0 = Vec3::ZERO;
     }
 
-    if keys.pressed(KeyCode::KeyW) {
-        paddle_left.single_mut().linvel = Vec3::Z * PADDLE_SPEED;
-    } else if keys.pressed(KeyCode::KeyS) {
-        paddle_left.single_mut().linvel = Vec3::NEG_Z * PADDLE_SPEED;
+    if keys.just_pressed(KeyCode::KeyW) {
+        paddle_left.single_mut().0 = Vec3::Z * PADDLE_SPEED;
+    } else if keys.just_pressed(KeyCode::KeyS) {
+        paddle_left.single_mut().0 = Vec3::NEG_Z * PADDLE_SPEED;
     } else if keys.just_released(KeyCode::KeyW) || keys.just_released(KeyCode::KeyS) {
-        paddle_left.single_mut().linvel = Vec3::ZERO;
+        paddle_left.single_mut().0 = Vec3::ZERO;
     }
 }

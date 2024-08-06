@@ -1,19 +1,14 @@
+use avian3d::prelude::{CoefficientCombine, Collider, Friction, RigidBody};
 use bevy::asset::Assets;
 use bevy::core::Name;
 use bevy::math::{Vec2, Vec3};
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
-    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, Entity, EventReader,
-    MaterialMeshBundle, Mesh, NextState, Plane3d, Query, ResMut, Transform, With, Without,
+    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
+    Mesh, Plane3d, ResMut, Transform,
 };
-use bevy_rapier3d::dynamics::{Ccd, RigidBody};
-use bevy_rapier3d::geometry::Collider;
-use bevy_rapier3d::prelude::{CollisionEvent, Friction};
 
 use crate::plugin::paddle::{Left, Right};
-use crate::plugin::puck::Puck;
-use crate::plugin::score::Score;
-use crate::plugin::AppState;
 
 #[derive(Component)]
 pub(crate) struct Wall;
@@ -55,9 +50,9 @@ pub fn add_playground(
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
-        Friction::new(0.),
-        Ccd::enabled(),
-        Collider::cuboid(WIDTH / 2., 0., HEIGHT / 2.),
+        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+        RigidBody::Static,
+        Collider::cuboid(WIDTH, 0., HEIGHT),
     ));
 
     spawn_wall(Position::Top, &mut commands, &mut meshes, &mut materials);
@@ -98,10 +93,9 @@ fn spawn_wall(
             transform: Transform::from_xyz(x, 25., z),
             ..default()
         },
-        Collider::cuboid(width / 2., 50. / 2., height / 2.),
-        Ccd::enabled(),
+        Collider::cuboid(width, 50., height),
         Wall,
-        RigidBody::Fixed,
+        RigidBody::Static,
     ));
     if position == Position::Left || position == Position::Right {
         //wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
@@ -112,32 +106,29 @@ fn spawn_wall(
         };
     }
 }
-
-pub fn display_events(
-    mut commands: Commands,
-    mut collision_events: EventReader<CollisionEvent>,
-    wall_left: Query<Entity, (With<Wall>, With<Left>, Without<Right>)>,
-    wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
-    mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
-    mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
-    ball: Query<Entity, With<Puck>>,
-    mut next_state: ResMut<NextState<AppState>>,
-) {
-    for collision_event in collision_events.read() {
-        if let &CollisionEvent::Started(e1, e2, _) = collision_event {
-            if e1 == wall_left.single() || e2 == wall_left.single() {
-                println!("Collision with left wall => e2");
-                commands.entity(ball.single()).despawn();
-                score_right.single_mut().0 += 1;
-                next_state.set(AppState::Goal);
-            }
-            if e1 == wall_right.single() || e2 == wall_right.single() {
-                println!("Collision with right wall => e2");
-                commands.entity(ball.single()).despawn();
-                score_left.single_mut().0 += 1;
-                next_state.set(AppState::Goal);
-            }
-        }
-        // println!("Received collision event: {:?}", collision_event);
-    }
-}
+//
+// pub fn display_events(
+//     mut commands: Commands,
+//     mut collision_events: EventReader<CollisionEvent>,
+//     wall_left: Query<Entity, (With<Wall>, With<Left>, Without<Right>)>,
+//     wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
+//     mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
+//     mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
+//     ball: Query<Entity, With<Puck>>,
+//     mut next_state: ResMut<NextState<AppState>>,
+// ) {
+//     for collision_event in collision_events.read() {
+//         if let &CollisionEvent::Started(e1, e2, _) = collision_event {
+//             if e1 == wall_left.single() || e2 == wall_left.single() {
+//                 commands.entity(ball.single()).despawn();
+//                 score_right.single_mut().0 += 1;
+//                 next_state.set(AppState::Goal);
+//             }
+//             if e1 == wall_right.single() || e2 == wall_right.single() {
+//                 commands.entity(ball.single()).despawn();
+//                 score_left.single_mut().0 += 1;
+//                 next_state.set(AppState::Goal);
+//             }
+//         }
+//     }
+// }
