@@ -8,7 +8,7 @@ use bevy::prelude::{
     Mesh, Plane3d, ResMut, Transform,
 };
 
-use crate::plugin::paddle::{Left, Right};
+use crate::plugin::paddle::Player;
 
 #[derive(Component)]
 pub(crate) struct Wall;
@@ -32,7 +32,7 @@ pub fn add_playground(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0., 1000., -1000.).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
     commands.insert_resource(AmbientLight {
@@ -72,14 +72,14 @@ fn spawn_wall(
             WIDTH + WALL_WIDTH * 2.,
             WALL_WIDTH,
             0.0,
-            HEIGHT / 2. + WALL_WIDTH / 2.,
+            -HEIGHT / 2. - WALL_WIDTH / 2.,
         ),
         Position::Right => (WALL_WIDTH, HEIGHT, WIDTH / 2. + WALL_WIDTH / 2., 0.0),
         Position::Bottom => (
             WIDTH + WALL_WIDTH * 2.,
             WALL_WIDTH,
             0.0,
-            -HEIGHT / 2. - WALL_WIDTH / 2.,
+            HEIGHT / 2. + WALL_WIDTH / 2.,
         ),
         Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
     };
@@ -100,35 +100,9 @@ fn spawn_wall(
     if position == Position::Left || position == Position::Right {
         //wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
         match position {
-            Position::Left => wall.insert(Left),
-            Position::Right => wall.insert(Right),
+            Position::Left => wall.insert(Player::Left),
+            Position::Right => wall.insert(Player::Right),
             _ => panic!("Invalid position"),
         };
     }
 }
-//
-// pub fn display_events(
-//     mut commands: Commands,
-//     mut collision_events: EventReader<CollisionEvent>,
-//     wall_left: Query<Entity, (With<Wall>, With<Left>, Without<Right>)>,
-//     wall_right: Query<Entity, (With<Wall>, With<Right>, Without<Left>)>,
-//     mut score_left: Query<&mut Score, (With<Left>, Without<Right>)>,
-//     mut score_right: Query<&mut Score, (With<Right>, Without<Left>)>,
-//     ball: Query<Entity, With<Puck>>,
-//     mut next_state: ResMut<NextState<AppState>>,
-// ) {
-//     for collision_event in collision_events.read() {
-//         if let &CollisionEvent::Started(e1, e2, _) = collision_event {
-//             if e1 == wall_left.single() || e2 == wall_left.single() {
-//                 commands.entity(ball.single()).despawn();
-//                 score_right.single_mut().0 += 1;
-//                 next_state.set(AppState::Goal);
-//             }
-//             if e1 == wall_right.single() || e2 == wall_right.single() {
-//                 commands.entity(ball.single()).despawn();
-//                 score_left.single_mut().0 += 1;
-//                 next_state.set(AppState::Goal);
-//             }
-//         }
-//     }
-// }

@@ -1,11 +1,10 @@
 use avian3d::prelude::{Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody};
 use bevy::asset::Assets;
-use bevy::input::gamepad::GamepadButtonInput;
-use bevy::input::{ButtonInput, ButtonState};
+use bevy::input::ButtonInput;
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, EventReader, Gamepad, GamepadButtonType, KeyCode, Mesh,
-    Name, Query, Res, ResMut, Transform, Vec3, With, Without,
+    default, Color, Commands, Component, Gamepad, GamepadButton, GamepadButtonType, KeyCode, Mesh,
+    Name, Query, Res, ResMut, Transform, Vec3, With,
 };
 
 use crate::plugin::playground::{MARGIN, WIDTH};
@@ -16,11 +15,11 @@ const PADDLE_SPEED: f32 = 1000.;
 #[derive(Component)]
 pub struct Paddle;
 
-#[derive(Component)]
-pub struct Right;
-
-#[derive(Component)]
-pub struct Left;
+#[derive(Component, PartialEq)]
+pub enum Player {
+    Left,
+    Right,
+}
 
 pub fn add_paddle(
     mut commands: Commands,
@@ -31,15 +30,14 @@ pub fn add_paddle(
     const PADDLE_RADIUS: f32 = 20.0;
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
     let mesh = meshes.add(bevy::prelude::Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
-    let material = materials.add(Color::srgb(0.0, 1.0, 0.0));
 
     commands.spawn((
         Name::new("PADDLE Left"),
         Paddle,
-        Left,
+        Player::Left,
         MaterialMeshBundle {
             mesh: mesh.clone(),
-            material: material.clone(),
+            material: materials.add(Color::srgb(1.0, 0.0, 0.0)),
             transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH + MARGIN, 0.0, 0.0),
             ..default()
         },
@@ -57,10 +55,10 @@ pub fn add_paddle(
     commands.spawn((
         Name::new("PADDLE Right"),
         Paddle,
-        Right,
+        Player::Right,
         MaterialMeshBundle {
             mesh,
-            material,
+            material: materials.add(Color::srgb(0.0, 1.0, 0.0)),
             transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH - MARGIN, 0.0, 0.0),
             ..default()
         },
@@ -78,65 +76,54 @@ pub fn add_paddle(
 }
 
 pub fn move_paddle(
-    mut gamepad_button: EventReader<GamepadButtonInput>,
-    //mut gamepad_axis: EventReader<GamepadAxisChangedEvent>,
-    keys: Res<ButtonInput<KeyCode>>,
-    mut paddle_left: Query<&mut LinearVelocity, (With<Paddle>, With<Left>, Without<Right>)>,
-    mut paddle_right: Query<&mut LinearVelocity, (With<Paddle>, With<Right>, Without<Left>)>,
+    key_input: Res<ButtonInput<KeyCode>>,
+    gamepad_input: Res<ButtonInput<GamepadButton>>,
+    mut paddles: Query<(&mut LinearVelocity, &Player), With<Paddle>>,
 ) {
-    for ev in gamepad_button.read() {
-        println!("{:?}", ev);
-
-        let gamepad_id = ev.button.gamepad.id;
-        let button_type = ev.button.button_type;
-        let state = ev.state;
-
-        // let paddle = match gamepad_id {
-        //     0 => &mut paddle_left,
-        //     1 => &mut paddle_right,
-        //     _ => continue,
-        // };
-
-        let direction = match button_type {
-            GamepadButtonType::DPadUp => Vec3::Z,
-            GamepadButtonType::DPadDown => Vec3::NEG_Z,
-            _ => continue,
+    for (mut velocity, player) in paddles.iter_mut() {
+        match get_action(player, &key_input, &gamepad_input) {
+            Action::Up => velocity.0 = Vec3::NEG_Z * PADDLE_SPEED,
+            Action::Down => velocity.0 = Vec3::Z * PADDLE_SPEED,
+            Action::Stop => velocity.0 = Vec3::ZERO,
+            Action::None => {}
         };
-
-        match state {
-            ButtonState::Pressed => {
-                println!("{:?}", button_type);
-                // paddle.single_mut().0 = direction * PADDLE_SPEED;
-                match gamepad_id {
-                    0 => paddle_left.single_mut().0 = direction * PADDLE_SPEED,
-                    1 => paddle_right.single_mut().0 = direction * PADDLE_SPEED,
-                    _ => continue,
-                }
-            }
-            ButtonState::Released => {
-                // paddle.single_mut().0 = Vec2::ZERO;
-                match gamepad_id {
-                    0 => paddle_left.single_mut().0 = Vec3::ZERO,
-                    1 => paddle_right.single_mut().0 = Vec3::ZERO,
-                    _ => continue,
-                }
-            }
-        }
     }
+}
 
-    if keys.just_pressed(KeyCode::ArrowUp) {
-        paddle_right.single_mut().0 = Vec3::Z * PADDLE_SPEED;
-    } else if keys.just_pressed(KeyCode::ArrowDown) {
-        paddle_right.single_mut().0 = Vec3::NEG_Z * PADDLE_SPEED;
-    } else if keys.just_released(KeyCode::ArrowUp) || keys.just_released(KeyCode::ArrowDown) {
-        paddle_right.single_mut().0 = Vec3::ZERO;
+enum Action {
+    Up,
+    Down,
+    Stop,
+    None,
+}
+
+fn get_action(
+    player: &Player,
+    key_input: &Res<ButtonInput<KeyCode>>,
+    gamepad_input: &Res<ButtonInput<GamepadButton>>,
+) -> Action {
+    let (key_up, key_down, gamepad_id) = get_player_binding(player);
+    let gamepad_up = GamepadButton::new(gamepad_id, GamepadButtonType::DPadUp);
+    let gamepad_down = GamepadButton::new(gamepad_id, GamepadButtonType::DPadDown);
+
+    if key_input.just_pressed(key_up) || gamepad_input.just_pressed(gamepad_up) {
+        Action::Up
+    } else if key_input.just_pressed(key_down) || gamepad_input.just_pressed(gamepad_down) {
+        Action::Down
+    } else if key_input.just_released(key_up)
+        || gamepad_input.just_released(gamepad_up)
+        || key_input.just_released(key_down)
+        || gamepad_input.just_released(gamepad_down)
+    {
+        Action::Stop
+    } else {
+        Action::None
     }
+}
 
-    if keys.just_pressed(KeyCode::KeyW) {
-        paddle_left.single_mut().0 = Vec3::Z * PADDLE_SPEED;
-    } else if keys.just_pressed(KeyCode::KeyS) {
-        paddle_left.single_mut().0 = Vec3::NEG_Z * PADDLE_SPEED;
-    } else if keys.just_released(KeyCode::KeyW) || keys.just_released(KeyCode::KeyS) {
-        paddle_left.single_mut().0 = Vec3::ZERO;
+fn get_player_binding(player: &Player) -> (KeyCode, KeyCode, Gamepad) {
+    match player {
+        Player::Left => (KeyCode::KeyW, KeyCode::KeyS, Gamepad::new(0)),
+        Player::Right => (KeyCode::ArrowUp, KeyCode::ArrowDown, Gamepad::new(1)),
     }
 }

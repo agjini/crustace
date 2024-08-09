@@ -1,9 +1,8 @@
+use crate::plugin::paddle::Player;
 use bevy::prelude::{
     default, Commands, Component, JustifyText, PositionType, Query, Style, Text, TextBundle,
     TextStyle, Val,
 };
-
-use crate::plugin::paddle::{Left, Right};
 
 #[derive(Component)]
 pub struct Score(pub u8);
@@ -25,7 +24,7 @@ pub fn display_score(mut commands: Commands) {
             ..default()
         }),
         Score(0),
-        Left,
+        Player::Left,
     ));
 
     commands.spawn((
@@ -44,7 +43,7 @@ pub fn display_score(mut commands: Commands) {
             ..default()
         }),
         Score(0),
-        Right,
+        Player::Right,
     ));
 }
 
