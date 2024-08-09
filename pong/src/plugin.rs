@@ -8,7 +8,8 @@ use crate::plugin::kickoff::{display_action, kickoff, to_kickoff};
 use crate::plugin::paddle::{add_paddle, move_paddle};
 use crate::plugin::playground::add_playground;
 use crate::plugin::puck::add_puck;
-use crate::plugin::score::{display_score, update_score};
+use crate::plugin::score::{check_goals, display_score, shake_on_goal, update_score, GoalEvent};
+use crate::plugin::shake::ShakePlugin;
 use crate::plugin::state::AppState;
 
 mod kickoff;
@@ -16,6 +17,7 @@ mod paddle;
 mod playground;
 mod puck;
 mod score;
+mod shake;
 mod state;
 
 pub struct PongPlugin;
@@ -24,8 +26,10 @@ impl Plugin for PongPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<AppState>()
             .enable_state_scoped_entities::<AppState>()
+            .add_event::<GoalEvent>()
             .add_plugins(PhysicsPlugins::default().with_length_unit(100.))
             .add_plugins(PhysicsDebugPlugin::default())
+            .add_plugins(ShakePlugin)
             .insert_resource(Gravity(Vector::NEG_Y * 9.81 * 100.0))
             .add_systems(Startup, add_playground)
             .add_systems(Startup, add_paddle)
@@ -33,8 +37,9 @@ impl Plugin for PongPlugin {
             .add_systems(OnEnter(AppState::KickOff), display_action)
             .add_systems(Update, kickoff.run_if(in_state(AppState::KickOff)))
             .add_systems(OnEnter(AppState::InGame), add_puck)
+            .add_systems(Update, check_goals)
+            .add_systems(Update, shake_on_goal)
             .add_systems(Update, move_paddle)
-            // .add_systems(Update, display_events)
             .add_systems(Update, update_score)
             .add_systems(OnEnter(AppState::Goal), to_kickoff);
     }

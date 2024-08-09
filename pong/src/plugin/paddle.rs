@@ -15,7 +15,7 @@ const PADDLE_SPEED: f32 = 1000.;
 #[derive(Component)]
 pub struct Paddle;
 
-#[derive(Component, PartialEq)]
+#[derive(Component, PartialEq, Debug, Copy, Clone)]
 pub enum Player {
     Left,
     Right,

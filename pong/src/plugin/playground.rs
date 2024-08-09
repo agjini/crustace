@@ -1,4 +1,5 @@
-use avian3d::prelude::{CoefficientCombine, Collider, Friction, RigidBody};
+use crate::plugin::paddle::Player;
+use avian3d::prelude::{CoefficientCombine, Collider, Friction, RigidBody, Sensor};
 use bevy::asset::Assets;
 use bevy::core::Name;
 use bevy::math::{Vec2, Vec3};
@@ -8,10 +9,13 @@ use bevy::prelude::{
     Mesh, Plane3d, ResMut, Transform,
 };
 
-use crate::plugin::paddle::Player;
+use crate::plugin::shake::Shake;
 
 #[derive(Component)]
-pub(crate) struct Wall;
+pub struct Wall;
+
+#[derive(Component)]
+pub struct Goal(pub Player);
 
 #[derive(Debug, Eq, PartialEq, Component, Clone, Copy)]
 pub enum Position {
@@ -31,10 +35,13 @@ pub fn add_playground(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+        Shake::new(0.2, 0.3, 0.2),
+    ));
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 1000.0,
@@ -59,6 +66,9 @@ pub fn add_playground(
     spawn_wall(Position::Bottom, &mut commands, &mut meshes, &mut materials);
     spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
     spawn_wall(Position::Left, &mut commands, &mut meshes, &mut materials);
+
+    spawn_goal(Player::Left, &mut commands, &mut meshes, &mut materials);
+    spawn_goal(Player::Right, &mut commands, &mut meshes, &mut materials);
 }
 
 fn spawn_wall(
@@ -85,7 +95,7 @@ fn spawn_wall(
     };
 
     let mesh = meshes.add(Cuboid::new(width, 50., height));
-    let mut wall = commands.spawn((
+    commands.spawn((
         Name::new(format!("WALL {position:?}")),
         MaterialMeshBundle {
             mesh,
@@ -97,12 +107,43 @@ fn spawn_wall(
         Wall,
         RigidBody::Static,
     ));
-    if position == Position::Left || position == Position::Right {
-        //wall.insert((Sensor, ActiveEvents::COLLISION_EVENTS));
-        match position {
-            Position::Left => wall.insert(Player::Left),
-            Position::Right => wall.insert(Player::Right),
-            _ => panic!("Invalid position"),
-        };
-    }
+}
+
+fn spawn_goal(
+    player: Player,
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
+    let goal_width = WALL_WIDTH;
+    let goal_height = HEIGHT / 4.;
+    let (width, height, x, z) = match player {
+        Player::Left => (
+            goal_width,
+            goal_height,
+            -WIDTH / 2. - goal_width / 2. + 5.,
+            0.0,
+        ),
+        Player::Right => (
+            goal_width,
+            goal_height,
+            WIDTH / 2. + goal_width / 2. - 5.,
+            0.0,
+        ),
+    };
+
+    let mesh = meshes.add(Cuboid::new(width, 60., height));
+    commands.spawn((
+        Name::new(format!("GOAL {player:?}")),
+        MaterialMeshBundle {
+            mesh,
+            material: materials.add(Color::srgb(1.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(x, 25., z),
+            ..default()
+        },
+        Collider::cuboid(width, 60., height),
+        Sensor::default(),
+        Goal(player),
+        RigidBody::Static,
+    ));
 }
