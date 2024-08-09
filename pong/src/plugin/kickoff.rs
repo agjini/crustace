@@ -1,16 +1,15 @@
-use bevy::input::ButtonInput;
 use bevy::input::gamepad::GamepadButtonInput;
-use bevy::prelude::{default, Commands, Component, Entity, JustifyText, KeyCode, NextState, PositionType, Query, Res, ResMut, Style, TextBundle, TextStyle, Val, With, EventReader};
+use bevy::input::ButtonInput;
+use bevy::prelude::{
+    default, Commands, EventReader, JustifyText, KeyCode, NextState, PositionType, Res, ResMut,
+    StateScoped, Style, TextBundle, TextStyle, Val,
+};
 
-use crate::plugin::AppState;
-
-#[derive(Component)]
-pub struct ToClean;
+use crate::plugin::state::AppState;
 
 pub fn display_action(mut commands: Commands) {
-    println!("add_kickoff");
     commands.spawn((
-        ToClean,
+        StateScoped(AppState::KickOff),
         TextBundle::from_section(
             "press space to start",
             TextStyle {
@@ -29,9 +28,10 @@ pub fn display_action(mut commands: Commands) {
 }
 
 pub fn kickoff(
-    keys: Res<ButtonInput<KeyCode>>, 
+    keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<AppState>>,
-    mut gamepad_button: EventReader<GamepadButtonInput>) {
+    mut gamepad_button: EventReader<GamepadButtonInput>,
+) {
     if keys.just_pressed(KeyCode::Space) {
         next_state.set(AppState::InGame);
     }
@@ -42,10 +42,4 @@ pub fn kickoff(
 
 pub fn to_kickoff(mut next_state: ResMut<NextState<AppState>>) {
     next_state.set(AppState::KickOff);
-}
-
-pub fn clean_action(mut commands: Commands, query: Query<Entity, With<ToClean>>) {
-    for to_clean in query.iter() {
-        commands.entity(to_clean).despawn()
-    }
 }
