@@ -87,7 +87,7 @@ pub fn check_goals(
     }
 }
 
-pub fn shake_on_goal(
+pub fn increment_score_on_goal(
     mut goals: EventReader<GoalEvent>,
     mut query: Query<(&mut Score, &Player)>,
     mut shake_query: Query<&mut Shake>,
@@ -101,5 +101,15 @@ pub fn shake_on_goal(
                 }
             }
         }
+    }
+}
+
+pub fn shake_on_goal(mut goals: EventReader<GoalEvent>, mut shake_query: Query<&mut Shake>) {
+    if goals.read().len() == 0 {
+        return;
+    }
+
+    for mut shake in shake_query.iter_mut() {
+        shake.add_time(0.45);
     }
 }

@@ -40,7 +40,7 @@ pub fn add_playground(
             transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        Shake::new(0.2, 0.3, 0.2),
+        Shake::new(0.0, 0.3, 0.2),
     ));
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
