@@ -1,10 +1,12 @@
-use avian3d::prelude::{Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody};
+use avian3d::prelude::{
+    CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody,
+};
 use bevy::asset::Assets;
 use bevy::input::ButtonInput;
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, Gamepad, GamepadButton, GamepadButtonType, KeyCode, Mesh,
-    Name, Query, Res, ResMut, Transform, Vec3, With,
+    default, Color, Commands, Component, Cylinder, Gamepad, GamepadButton, GamepadButtonType,
+    KeyCode, Mesh, Name, Query, Res, ResMut, Transform, Vec3, With,
 };
 
 use crate::plugin::playground::{MARGIN, WIDTH};
@@ -15,7 +17,7 @@ const PADDLE_SPEED: f32 = 1000.;
 #[derive(Component)]
 pub struct Paddle;
 
-#[derive(Component, PartialEq)]
+#[derive(Component, PartialEq, Debug, Copy, Clone)]
 pub enum Player {
     Left,
     Right,
@@ -29,7 +31,7 @@ pub fn add_paddle(
     const PADDLE_HEIGHT: f32 = 10.0;
     const PADDLE_RADIUS: f32 = 20.0;
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
-    let mesh = meshes.add(bevy::prelude::Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
+    let mesh = meshes.add(Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
 
     commands.spawn((
         Name::new("PADDLE Left"),
@@ -50,7 +52,7 @@ pub fn add_paddle(
             .lock_rotation_z()
             .lock_translation_x()
             .lock_translation_y(),
-        Restitution::new(0.0).with_combine_rule(avian3d::prelude::CoefficientCombine::Min),
+        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
     ));
     commands.spawn((
         Name::new("PADDLE Right"),
@@ -71,7 +73,7 @@ pub fn add_paddle(
             .lock_rotation_z()
             .lock_translation_x()
             .lock_translation_y(),
-        Restitution::new(0.0).with_combine_rule(avian3d::prelude::CoefficientCombine::Min),
+        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
     ));
 }
 
