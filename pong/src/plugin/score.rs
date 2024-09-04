@@ -63,7 +63,7 @@ pub struct GoalEvent {
     player: Player,
 }
 
-pub fn check_goals(
+pub fn check_goal(
     puck: Query<Entity, With<Puck>>,
     goals: Query<(Entity, &Goal)>,
     mut collision_event_reader: EventReader<CollisionStarted>,
@@ -90,15 +90,11 @@ pub fn check_goals(
 pub fn increment_score_on_goal(
     mut goals: EventReader<GoalEvent>,
     mut query: Query<(&mut Score, &Player)>,
-    mut shake_query: Query<&mut Shake>,
 ) {
     for goal in goals.read() {
         for (mut score, player) in query.iter_mut() {
-            if player == &goal.player {
+            if player != &goal.player {
                 score.0 += 1;
-                for mut shake in shake_query.iter_mut() {
-                    shake.add_time(0.45);
-                }
             }
         }
     }

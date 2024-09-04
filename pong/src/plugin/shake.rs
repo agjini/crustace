@@ -38,6 +38,7 @@ impl Shake {
             original_transform: None,
         }
     }
+
     pub fn add_time(&mut self, seconds: f32) {
         self.time += seconds;
     }
