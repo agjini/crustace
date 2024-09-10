@@ -88,10 +88,8 @@ pub fn add_paddle(
     ));
 }
 
-pub fn move_paddle(
-    mut paddles: Query<(&mut LinearVelocity, &Player, &ActionState<Action>), With<Paddle>>,
-) {
-    for (mut velocity, player, action_state) in paddles.iter_mut() {
+pub fn move_paddle(mut paddles: Query<(&mut LinearVelocity, &ActionState<Action>), With<Paddle>>) {
+    for (mut velocity, action_state) in paddles.iter_mut() {
         if let Some(dual_axis_data) = action_state.dual_axis_data(&Action::Move) {
             velocity.0 =
                 Vec3::new(dual_axis_data.pair.x, 0., -dual_axis_data.pair.y) * PADDLE_SPEED;
