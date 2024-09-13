@@ -1,17 +1,13 @@
 use crate::plugin::playground::{MARGIN, WIDTH};
-use avian3d::dynamics::integrator::IntegrationSet::Velocity;
 use avian3d::prelude::{
     CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody,
 };
 use bevy::asset::Assets;
-use bevy::input::keyboard::Key::New;
-use bevy::input::ButtonInput;
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, Cylinder, Gamepad, GamepadButton, GamepadButtonType,
-    KeyCode, Mesh, Mut, Name, Query, Reflect, Res, ResMut, Transform, Vec3, With,
+    default, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, Query, Reflect, ResMut, Transform, Vec3, With,
 };
-use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputManagerPlugin, InputMap};
+use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
 const PADDLE_WIDTH: f32 = 40.0;
