@@ -5,9 +5,12 @@ use avian3d::prelude::{
 use bevy::asset::Assets;
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, Query, Reflect, ResMut, Transform, Vec3, With,
+    default, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, Query, Reflect, ResMut,
+    Transform, Vec3, With,
 };
-use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap};
+use leafwing_input_manager::prelude::{
+    ActionState, GamepadStick, InputMap, KeyboardVirtualAxis, KeyboardVirtualDPad,
+};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
 const PADDLE_WIDTH: f32 = 40.0;
@@ -39,6 +42,7 @@ pub fn add_paddle(
         InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
+                .with_dual_axis(Action::Move, KeyboardVirtualDPad::WASD)
                 .with_gamepad(Gamepad::new(0)),
         ),
         MaterialMeshBundle {
@@ -64,6 +68,7 @@ pub fn add_paddle(
         InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
+                .with_dual_axis(Action::Move, KeyboardVirtualDPad::ARROW_KEYS)
                 .with_gamepad(Gamepad::new(1)),
         ),
         MaterialMeshBundle {
