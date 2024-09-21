@@ -8,18 +8,19 @@ use bevy::prelude::{
     default, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, Query, Reflect, ResMut,
     Transform, Vec3, With,
 };
-use leafwing_input_manager::prelude::{
-    ActionState, GamepadStick, InputMap, KeyboardVirtualAxis, KeyboardVirtualDPad,
-};
+use blenvy::ReflectComponent;
+use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
 const PADDLE_WIDTH: f32 = 40.0;
 const PADDLE_SPEED: f32 = 1000.;
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct Paddle;
 
-#[derive(Component, PartialEq, Debug, Copy, Clone)]
+#[derive(Component, Reflect, PartialEq, Debug, Copy, Clone)]
+#[reflect(Component)]
 pub enum Player {
     Left,
     Right,

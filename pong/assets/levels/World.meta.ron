@@ -1,0 +1,8 @@
+(
+  assets:
+   [ 
+    ("Playground", File ( path: "blueprints/Playground.glb" )),
+    ("Material.001", File ( path: "materials/Material.001.glb" )),
+    ("Paddle", File ( path: "blueprints/Paddle.glb" )),
+   ]
+)

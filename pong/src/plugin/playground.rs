@@ -1,18 +1,15 @@
 use crate::plugin::paddle::Player;
-use avian3d::prelude::{CoefficientCombine, Collider, Friction, RigidBody, Sensor};
+use crate::plugin::shake::Shake;
+use avian3d::prelude::{Collider, RigidBody, Sensor};
 use bevy::asset::Assets;
 use bevy::core::Name;
-use bevy::math::{Vec2, Vec3};
+use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
     default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
-    Mesh, Plane3d, ResMut, Transform,
+    Mesh, ResMut, Transform,
 };
-
-use crate::plugin::shake::Shake;
-
-#[derive(Component)]
-pub struct Wall;
+use blenvy::{BlueprintInfo, GameWorldTag, HideUntilReady, SpawnBlueprint};
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -35,40 +32,47 @@ pub fn add_playground(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
-            ..default()
-        },
-        Shake::new(0.0, 0.3, 0.2),
-    ));
-    commands.insert_resource(AmbientLight {
-        color: Color::WHITE,
-        brightness: 1000.0,
-        ..default()
-    });
+    // commands.spawn((
+    //     Camera3dBundle {
+    //         transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
+    //         ..default()
+    //     },
+    //     Shake::new(0.0, 0.3, 0.2),
+    // ));
+    // commands.insert_resource(AmbientLight {
+    //     color: Color::WHITE,
+    //     brightness: 1000.0,
+    //     ..default()
+    // });
 
-    let mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::new(WIDTH / 2., HEIGHT / 2.)));
     commands.spawn((
-        Name::new("PLAYGROUND"),
-        MaterialMeshBundle {
-            mesh,
-            material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        },
-        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
-        RigidBody::Static,
-        Collider::cuboid(WIDTH, 0., HEIGHT),
+        BlueprintInfo::from_path("levels/World.glb"),
+        SpawnBlueprint,
+        HideUntilReady,
+        GameWorldTag,
     ));
 
-    spawn_wall(Position::Top, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Bottom, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Left, &mut commands, &mut meshes, &mut materials);
-
-    spawn_goal(Player::Left, &mut commands, &mut meshes, &mut materials);
-    spawn_goal(Player::Right, &mut commands, &mut meshes, &mut materials);
+    // let mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::new(WIDTH / 2., HEIGHT / 2.)));
+    // commands.spawn((
+    //     Name::new("PLAYGROUND"),
+    //     MaterialMeshBundle {
+    //         mesh,
+    //         material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
+    //         transform: Transform::from_xyz(0.0, 0.0, 0.0),
+    //         ..default()
+    //     },
+    //     Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+    //     RigidBody::Static,
+    //     Collider::cuboid(WIDTH, 0., HEIGHT),
+    // ));
+    //
+    // spawn_wall(Position::Top, &mut commands, &mut meshes, &mut materials);
+    // spawn_wall(Position::Bottom, &mut commands, &mut meshes, &mut materials);
+    // spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
+    // spawn_wall(Position::Left, &mut commands, &mut meshes, &mut materials);
+    //
+    // spawn_goal(Player::Left, &mut commands, &mut meshes, &mut materials);
+    // spawn_goal(Player::Right, &mut commands, &mut meshes, &mut materials);
 }
 
 fn spawn_wall(
@@ -104,7 +108,6 @@ fn spawn_wall(
             ..default()
         },
         Collider::cuboid(width, 50., height),
-        Wall,
         RigidBody::Static,
     ));
 }

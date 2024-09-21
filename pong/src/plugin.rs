@@ -1,5 +1,5 @@
 use crate::plugin::kickoff::{display_action, kickoff, to_kickoff};
-use crate::plugin::paddle::{add_paddle, move_paddle};
+use crate::plugin::paddle::{add_paddle, move_paddle, Paddle, Player};
 use crate::plugin::playground::add_playground;
 use crate::plugin::puck::add_puck;
 use crate::plugin::score::{
@@ -12,6 +12,7 @@ use avian3d::prelude::{Gravity, PhysicsDebugPlugin};
 use avian3d::PhysicsPlugins;
 use bevy::app::{Startup, Update};
 use bevy::prelude::{in_state, App, AppExtStates, IntoSystemConfigs, OnEnter, Plugin};
+use blenvy::BlenvyPlugin;
 use leafwing_input_manager::prelude::InputManagerPlugin;
 
 mod kickoff;
@@ -29,6 +30,9 @@ impl Plugin for PongPlugin {
         app.init_state::<AppState>()
             .enable_state_scoped_entities::<AppState>()
             .add_event::<GoalEvent>()
+            .register_type::<Player>()
+            .register_type::<Paddle>()
+            .add_plugins(BlenvyPlugin::default())
             .add_plugins(InputManagerPlugin::<paddle::Action>::default())
             .add_plugins(PhysicsPlugins::default().with_length_unit(100.))
             .add_plugins(PhysicsDebugPlugin::default())
