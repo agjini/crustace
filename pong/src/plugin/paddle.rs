@@ -1,93 +1,81 @@
 use crate::plugin::playground::{MARGIN, WIDTH};
+use avian3d::collision::{ColliderConstructor, ColliderConstructorHierarchy, CollisionMargin};
 use avian3d::prelude::{
-    CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody,
+    CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Mass, MassPropertiesBundle,
+    Restitution, RigidBody,
 };
-use bevy::asset::Assets;
+use bevy::asset::{AssetServer, Assets, Handle};
 use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
 use bevy::prelude::{
-    default, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, Query, Reflect, ResMut,
-    Transform, Vec3, With,
+    default, info, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, PbrBundle, Query,
+    Reflect, Res, ResMut, Scene, SceneBundle, Transform, Vec3, With,
 };
-use blenvy::ReflectComponent;
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
 const PADDLE_WIDTH: f32 = 40.0;
-const PADDLE_SPEED: f32 = 1000.;
+const PADDLE_SPEED: f32 = 15.;
 
 #[derive(Component, Reflect)]
-#[reflect(Component)]
 pub struct Paddle;
 
 #[derive(Component, Reflect, PartialEq, Debug, Copy, Clone)]
-#[reflect(Component)]
 pub enum Player {
     Left,
     Right,
 }
 
-pub fn add_paddle(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    const PADDLE_HEIGHT: f32 = 10.0;
-    const PADDLE_RADIUS: f32 = 20.0;
-    let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
-    let mesh = meshes.add(Cylinder::new(PADDLE_RADIUS, PADDLE_HEIGHT));
+pub fn add_paddle(mut commands: Commands, asset_server: Res<AssetServer>) {
+    spawn_paddle(&mut commands, &asset_server, Player::Left);
+    spawn_paddle(&mut commands, &asset_server, Player::Right);
+}
 
+fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player: Player) {
+    const PADDLE_HEIGHT: f32 = 0.6;
+    const PADDLE_RADIUS: f32 = 0.4;
+    let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
+    let playground = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
+    let material = asset_server.load(format!("materials/Material{player:?}.glb#Material0"));
     commands.spawn((
-        Name::new("PADDLE Left"),
+        Name::new(format!("Paddle {player:?}")),
+        PbrBundle {
+            mesh: playground,
+            transform: match player {
+                Player::Left => Transform::from_xyz(-7., 4., 0.),
+                Player::Right => Transform::from_xyz(7., 4., 0.),
+            },
+            material,
+            ..default()
+        },
         Paddle,
-        Player::Left,
-        InputManagerBundle::with_map(
+        player,
+        get_input_map(&player),
+        RigidBody::Dynamic,
+        paddle_collider.clone(),
+        Friction::new(0.),
+        LockedAxes::new()
+            .lock_rotation_x()
+            .lock_rotation_y()
+            .lock_rotation_z(),
+        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
+    ));
+}
+
+fn get_input_map(player: &Player) -> InputManagerBundle<Action> {
+    match player {
+        Player::Left => InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
                 .with_dual_axis(Action::Move, KeyboardVirtualDPad::WASD)
                 .with_gamepad(Gamepad::new(0)),
         ),
-        MaterialMeshBundle {
-            mesh: mesh.clone(),
-            material: materials.add(Color::srgb(1.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(-(WIDTH / 2.) + PADDLE_WIDTH + MARGIN, 0.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        paddle_collider.clone(),
-        Friction::new(0.),
-        LockedAxes::new()
-            .lock_rotation_x()
-            .lock_rotation_y()
-            .lock_rotation_z()
-            .lock_translation_y(),
-        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
-    ));
-    commands.spawn((
-        Name::new("PADDLE Right"),
-        Paddle,
-        Player::Right,
-        InputManagerBundle::with_map(
+        Player::Right => InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
                 .with_dual_axis(Action::Move, KeyboardVirtualDPad::ARROW_KEYS)
                 .with_gamepad(Gamepad::new(1)),
         ),
-        MaterialMeshBundle {
-            mesh,
-            material: materials.add(Color::srgb(0.0, 1.0, 0.0)),
-            transform: Transform::from_xyz((WIDTH / 2.) - PADDLE_WIDTH - MARGIN, 0.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        paddle_collider.clone(),
-        Friction::new(0.),
-        LockedAxes::new()
-            .lock_rotation_x()
-            .lock_rotation_y()
-            .lock_rotation_z()
-            .lock_translation_y(),
-        Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
-    ));
+    }
 }
 
 pub fn move_paddle(mut paddles: Query<(&mut LinearVelocity, &ActionState<Action>), With<Paddle>>) {

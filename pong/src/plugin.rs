@@ -1,5 +1,5 @@
 use crate::plugin::kickoff::{display_action, kickoff, to_kickoff};
-use crate::plugin::paddle::{add_paddle, move_paddle, Paddle, Player};
+use crate::plugin::paddle::{add_paddle, move_paddle, Action, Paddle, Player};
 use crate::plugin::playground::add_playground;
 use crate::plugin::puck::add_puck;
 use crate::plugin::score::{
@@ -12,7 +12,6 @@ use avian3d::prelude::{Gravity, PhysicsDebugPlugin};
 use avian3d::PhysicsPlugins;
 use bevy::app::{Startup, Update};
 use bevy::prelude::{in_state, App, AppExtStates, IntoSystemConfigs, OnEnter, Plugin};
-use blenvy::BlenvyPlugin;
 use leafwing_input_manager::prelude::InputManagerPlugin;
 
 mod kickoff;
@@ -32,14 +31,12 @@ impl Plugin for PongPlugin {
             .add_event::<GoalEvent>()
             .register_type::<Player>()
             .register_type::<Paddle>()
-            .add_plugins(BlenvyPlugin::default())
-            .add_plugins(InputManagerPlugin::<paddle::Action>::default())
+            .add_plugins(InputManagerPlugin::<Action>::default())
             .add_plugins(PhysicsPlugins::default().with_length_unit(100.))
             .add_plugins(PhysicsDebugPlugin::default())
             .add_plugins(ShakePlugin)
             .insert_resource(Gravity(Vector::NEG_Y * 9.81 * 100.0))
-            .add_systems(Startup, add_playground)
-            .add_systems(Startup, add_paddle)
+            .add_systems(Startup, (add_playground, add_paddle).chain())
             .add_systems(Startup, display_score)
             .add_systems(OnEnter(AppState::KickOff), display_action)
             .add_systems(Update, kickoff.run_if(in_state(AppState::KickOff)))

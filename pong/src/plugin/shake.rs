@@ -4,7 +4,6 @@ use bevy::prelude::{
     Time, Transform, Vec3,
 };
 use bevy::transform::systems::{propagate_transforms, sync_simple_transforms};
-use blenvy::ReflectComponent;
 use noise::{NoiseFn, Perlin};
 
 pub(crate) struct ShakePlugin;
@@ -23,7 +22,6 @@ impl Plugin for ShakePlugin {
 }
 
 #[derive(Component, Reflect)]
-#[reflect(Component)]
 pub struct Shake {
     time: f32,
     amplitude: f32,
@@ -55,9 +53,9 @@ fn restore(mut shakes: Query<(&mut Shake, &mut Transform)>) {
     }
 }
 
-const MAX_YAW: f32 = 0.001;
-const MAX_PITCH: f32 = 0.001;
-const MAX_ROLL: f32 = 0.001;
+const MAX_YAW: f32 = 0.01;
+const MAX_PITCH: f32 = 0.01;
+const MAX_ROLL: f32 = 0.01;
 
 fn shake(time: Res<Time>, mut query: Query<(&mut Shake, &mut Transform)>) {
     let perlin1 = Perlin::new(1);
