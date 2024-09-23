@@ -1,19 +1,16 @@
-use crate::plugin::playground::{MARGIN, WIDTH};
-use avian3d::collision::{ColliderConstructor, ColliderConstructorHierarchy, CollisionMargin};
 use avian3d::prelude::{
-    CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Mass, MassPropertiesBundle,
-    Restitution, RigidBody,
+    CoefficientCombine, Collider, Friction, LinearVelocity, LockedAxes, Restitution, RigidBody,
 };
-use bevy::asset::{AssetServer, Assets, Handle};
-use bevy::pbr::{MaterialMeshBundle, StandardMaterial};
+use bevy::asset::AssetServer;
 use bevy::prelude::{
-    default, info, Color, Commands, Component, Cylinder, Gamepad, Mesh, Name, PbrBundle, Query,
-    Reflect, Res, ResMut, Scene, SceneBundle, Transform, Vec3, With,
+    default, Commands, Component, Gamepad, Name, PbrBundle, Query, Reflect, Res, Transform, Vec3,
+    With,
 };
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
-const PADDLE_WIDTH: f32 = 40.0;
+const PADDLE_HEIGHT: f32 = 0.6;
+const PADDLE_RADIUS: f32 = 0.4;
 const PADDLE_SPEED: f32 = 15.;
 
 #[derive(Component, Reflect)]
@@ -31,8 +28,6 @@ pub fn add_paddle(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player: Player) {
-    const PADDLE_HEIGHT: f32 = 0.6;
-    const PADDLE_RADIUS: f32 = 0.4;
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
     let playground = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
     let material = asset_server.load(format!("materials/Material{player:?}.glb#Material0"));
