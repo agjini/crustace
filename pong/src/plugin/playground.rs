@@ -9,8 +9,8 @@ use bevy::core::Name;
 use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
-    default, AmbientLight, BuildChildren, Camera3dBundle, Color, Commands, Component, Cuboid,
-    MaterialMeshBundle, Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
+    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
+    Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
 };
 
 #[derive(Component)]
@@ -32,7 +32,7 @@ pub const MARGIN: f32 = 10.;
 pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(0., 14., 3.).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
         Shake::new(0., 0.6, 15.),
@@ -56,21 +56,17 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let mesh = asset_server.load("blueprints/Playground.glb#Mesh0/Primitive0");
     let material = asset_server.load("materials/PlaygroundMaterial.glb#Material0");
-    commands
-        .spawn((
-            Name::new("Playground"),
-            PbrBundle {
-                mesh,
-                material,
-                ..default()
-            },
-            Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
-            RigidBody::Static,
-            ColliderConstructor::TrimeshFromMesh,
-        ))
-        .with_children(|parent| {
-            parent.spawn((Collider::cuboid(WIDTH, 0.5, HEIGHT), RigidBody::Static));
-        });
+    commands.spawn((
+        Name::new("Playground"),
+        PbrBundle {
+            mesh,
+            material,
+            ..default()
+        },
+        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+        RigidBody::Static,
+        ColliderConstructor::TrimeshFromMesh,
+    ));
 }
 
 fn spawn_wall(

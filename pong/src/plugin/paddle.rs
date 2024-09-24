@@ -9,7 +9,7 @@ use bevy::prelude::{
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
-const PADDLE_HEIGHT: f32 = 0.6;
+const PADDLE_HEIGHT: f32 = 0.38;
 const PADDLE_RADIUS: f32 = 0.4;
 const PADDLE_SPEED: f32 = 15.;
 
@@ -29,15 +29,15 @@ pub fn add_paddle(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player: Player) {
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
-    let playground = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
+    let mesh = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
     let material = asset_server.load(format!("materials/Material{player:?}.glb#Material0"));
     commands.spawn((
         Name::new(format!("Paddle {player:?}")),
         PbrBundle {
-            mesh: playground,
+            mesh,
             transform: match player {
-                Player::Left => Transform::from_xyz(-7., 4., 0.),
-                Player::Right => Transform::from_xyz(7., 4., 0.),
+                Player::Left => Transform::from_xyz(-7., 0.25, 0.),
+                Player::Right => Transform::from_xyz(7., 0.25, 0.),
             },
             material,
             ..default()
@@ -51,7 +51,8 @@ fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player
         LockedAxes::new()
             .lock_rotation_x()
             .lock_rotation_y()
-            .lock_rotation_z(),
+            .lock_rotation_z()
+            .lock_translation_y(),
         Restitution::new(0.0).with_combine_rule(CoefficientCombine::Min),
     ));
 }
