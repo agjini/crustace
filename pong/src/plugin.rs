@@ -1,5 +1,5 @@
 use crate::plugin::kickoff::{display_action, kickoff, to_kickoff};
-use crate::plugin::paddle::{add_paddle, move_paddle};
+use crate::plugin::paddle::{add_paddle, move_paddle, Action, Paddle, Player};
 use crate::plugin::playground::add_playground;
 use crate::plugin::puck::add_puck;
 use crate::plugin::score::{
@@ -29,13 +29,14 @@ impl Plugin for PongPlugin {
         app.init_state::<AppState>()
             .enable_state_scoped_entities::<AppState>()
             .add_event::<GoalEvent>()
-            .add_plugins(InputManagerPlugin::<paddle::Action>::default())
+            .register_type::<Player>()
+            .register_type::<Paddle>()
+            .add_plugins(InputManagerPlugin::<Action>::default())
             .add_plugins(PhysicsPlugins::default().with_length_unit(100.))
             .add_plugins(PhysicsDebugPlugin::default())
             .add_plugins(ShakePlugin)
             .insert_resource(Gravity(Vector::NEG_Y * 9.81 * 100.0))
-            .add_systems(Startup, add_playground)
-            .add_systems(Startup, add_paddle)
+            .add_systems(Startup, (add_playground, add_paddle).chain())
             .add_systems(Startup, display_score)
             .add_systems(OnEnter(AppState::KickOff), display_action)
             .add_systems(Update, kickoff.run_if(in_state(AppState::KickOff)))

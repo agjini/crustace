@@ -1,18 +1,17 @@
 use crate::plugin::paddle::Player;
-use avian3d::prelude::{CoefficientCombine, Collider, Friction, RigidBody, Sensor};
-use bevy::asset::Assets;
+use crate::plugin::shake::Shake;
+use avian3d::prelude::{
+    CoefficientCombine, Collider, ColliderConstructor, Friction, RigidBody, Sensor,
+};
+use bevy::asset::{AssetServer, Assets};
+use bevy::color::palettes::css::WHITE;
 use bevy::core::Name;
-use bevy::math::{Vec2, Vec3};
+use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
-    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
-    Mesh, Plane3d, ResMut, Transform,
+    default, AmbientLight, BuildChildren, Camera3dBundle, Color, Commands, Component, Cuboid,
+    MaterialMeshBundle, Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
 };
-
-use crate::plugin::shake::Shake;
-
-#[derive(Component)]
-pub struct Wall;
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -30,45 +29,48 @@ pub const HEIGHT: f32 = 768.0;
 pub const WALL_WIDTH: f32 = 100.0;
 pub const MARGIN: f32 = 10.;
 
-pub fn add_playground(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(0., 1000., 1000.).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
             ..default()
         },
-        Shake::new(0.0, 0.3, 0.2),
+        Shake::new(0., 0.6, 15.),
     ));
+
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
-        brightness: 1000.0,
+        brightness: 100.,
+    });
+
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(1.0, 5.0, 0.0),
+        point_light: PointLight {
+            intensity: 100_000.0,
+            color: WHITE.into(),
+            shadows_enabled: true,
+            ..default()
+        },
         ..default()
     });
 
-    let mesh = meshes.add(Plane3d::new(Vec3::Y, Vec2::new(WIDTH / 2., HEIGHT / 2.)));
-    commands.spawn((
-        Name::new("PLAYGROUND"),
-        MaterialMeshBundle {
-            mesh,
-            material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        },
-        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
-        RigidBody::Static,
-        Collider::cuboid(WIDTH, 0., HEIGHT),
-    ));
-
-    spawn_wall(Position::Top, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Bottom, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Right, &mut commands, &mut meshes, &mut materials);
-    spawn_wall(Position::Left, &mut commands, &mut meshes, &mut materials);
-
-    spawn_goal(Player::Left, &mut commands, &mut meshes, &mut materials);
-    spawn_goal(Player::Right, &mut commands, &mut meshes, &mut materials);
+    let mesh = asset_server.load("blueprints/Playground.glb#Mesh0/Primitive0");
+    let material = asset_server.load("materials/PlaygroundMaterial.glb#Material0");
+    commands
+        .spawn((
+            Name::new("Playground"),
+            PbrBundle {
+                mesh,
+                material,
+                ..default()
+            },
+            Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+            RigidBody::Static,
+            ColliderConstructor::TrimeshFromMesh,
+        ))
+        .with_children(|parent| {
+            parent.spawn((Collider::cuboid(WIDTH, 0.1, HEIGHT), RigidBody::Static));
+        });
 }
 
 fn spawn_wall(
@@ -104,7 +106,6 @@ fn spawn_wall(
             ..default()
         },
         Collider::cuboid(width, 50., height),
-        Wall,
         RigidBody::Static,
     ));
 }
