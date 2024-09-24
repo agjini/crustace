@@ -1,29 +1,27 @@
-use avian3d::prelude::Restitution;
-use avian3d::prelude::{
-    CoefficientCombine, Collider, ExternalImpulse, Friction, LockedAxes, Mass, RigidBody,
-};
-use bevy::asset::Assets;
+use avian3d::prelude::{CoefficientCombine, Collider, Friction, LockedAxes, Mass, RigidBody};
+use avian3d::prelude::{ExternalImpulse, Restitution};
+use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::prelude::{
-    default, Color, Commands, Component, Cylinder, MaterialMeshBundle, Mesh, ResMut,
-    StandardMaterial, Transform, Vec3,
+    default, Color, Commands, Component, MaterialMeshBundle, Res, ResMut, StandardMaterial,
+    Transform, Vec3,
 };
 use rand::Rng;
 
-const INITIAL_VELOCITY: f32 = 10000000.0;
-const PUCK_RADIUS: f32 = 20.0;
-const PUCK_HEIGHT: f32 = 10.0;
+const INITIAL_VELOCITY: f32 = 1.0;
+const PUCK_RADIUS: f32 = 0.25;
+const PUCK_HEIGHT: f32 = 0.2;
 
 #[derive(Component)]
 pub(crate) struct Puck;
 
 pub fn add_puck(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let mut rng = rand::thread_rng();
-    let mesh = meshes.add(Cylinder::new(PUCK_RADIUS, PUCK_HEIGHT));
+    let mesh = asset_server.load("blueprints/Puck.glb#Mesh0/Primitive0");
     let material = materials.add(Color::srgb(0.0, 0.0, 0.7));
     let max_angle = std::f32::consts::PI / 4.;
     let mut angle: f32 = rng.gen_range(-max_angle..=max_angle);
@@ -36,12 +34,12 @@ pub fn add_puck(
         LockedAxes::new()
             .lock_rotation_x()
             .lock_rotation_y()
-            .lock_rotation_z()
-            .lock_translation_y(),
+            .lock_rotation_z(),
+        // .lock_translation_y(),
         MaterialMeshBundle {
             mesh,
             material,
-            transform: Transform::from_xyz(0.0, PUCK_HEIGHT, 0.0),
+            transform: Transform::from_xyz(0.0, 0.25, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
