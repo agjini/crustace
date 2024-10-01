@@ -1,5 +1,5 @@
-use avian3d::prelude::{CoefficientCombine, Collider, Friction, LockedAxes, Mass, RigidBody};
-use avian3d::prelude::{ExternalImpulse, Restitution};
+use avian3d::prelude::ExternalImpulse;
+use avian3d::prelude::{CoefficientCombine, Collider, LockedAxes, Mass, Restitution, RigidBody};
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::prelude::{
@@ -8,7 +8,7 @@ use bevy::prelude::{
 };
 use rand::Rng;
 
-const INITIAL_VELOCITY: f32 = 1.0;
+const INITIAL_VELOCITY: f32 = 10.0;
 const PUCK_RADIUS: f32 = 0.25;
 const PUCK_HEIGHT: f32 = 0.2;
 
@@ -34,8 +34,8 @@ pub fn add_puck(
         LockedAxes::new()
             .lock_rotation_x()
             .lock_rotation_y()
-            .lock_rotation_z(),
-        // .lock_translation_y(),
+            .lock_rotation_z()
+            .lock_translation_y(),
         MaterialMeshBundle {
             mesh,
             material,
@@ -43,7 +43,6 @@ pub fn add_puck(
             ..default()
         },
         RigidBody::Dynamic,
-        Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
         Collider::cylinder(PUCK_RADIUS, PUCK_HEIGHT),
         ExternalImpulse::new(Vec3::new(
             INITIAL_VELOCITY * f32::cos(angle),
@@ -51,7 +50,7 @@ pub fn add_puck(
             INITIAL_VELOCITY * f32::sin(angle),
         )),
         Mass(1.),
-        Restitution::new(1.0).with_combine_rule(CoefficientCombine::Max),
+        Restitution::new(1.).with_combine_rule(CoefficientCombine::Max),
         Puck,
     ));
 }
