@@ -9,7 +9,7 @@ use bevy::prelude::{
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
-const PADDLE_HEIGHT: f32 = 0.38;
+const PADDLE_HEIGHT: f32 = 0.72;
 const PADDLE_RADIUS: f32 = 0.4;
 const PADDLE_SPEED: f32 = 15.;
 
@@ -36,8 +36,8 @@ fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player
         PbrBundle {
             mesh,
             transform: match player {
-                Player::Left => Transform::from_xyz(-7., 0.25, 0.),
-                Player::Right => Transform::from_xyz(7., 0.25, 0.),
+                Player::Left => Transform::from_xyz(-7., 0.4, 0.),
+                Player::Right => Transform::from_xyz(7., 0.4, 0.),
             },
             material,
             ..default()

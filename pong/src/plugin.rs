@@ -8,7 +8,7 @@ use crate::plugin::score::{
 use crate::plugin::shake::ShakePlugin;
 use crate::plugin::state::AppState;
 use avian3d::math::Vector;
-use avian3d::prelude::{Gravity, PhysicsDebugPlugin};
+use avian3d::prelude::Gravity;
 use avian3d::PhysicsPlugins;
 use bevy::app::{Startup, Update};
 use bevy::prelude::{in_state, App, AppExtStates, IntoSystemConfigs, OnEnter, Plugin};
@@ -33,7 +33,7 @@ impl Plugin for PongPlugin {
             .register_type::<Paddle>()
             .add_plugins(InputManagerPlugin::<Action>::default())
             .add_plugins(PhysicsPlugins::default().with_length_unit(1.))
-            .add_plugins(PhysicsDebugPlugin::default())
+            // .add_plugins(PhysicsDebugPlugin::default())
             .add_plugins(ShakePlugin)
             .insert_resource(Gravity(Vector::NEG_Y * 9.81 * 1.0))
             .add_systems(Startup, (add_playground, add_paddle).chain())
