@@ -9,7 +9,7 @@ use bevy::prelude::{
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
-const PADDLE_HEIGHT: f32 = 0.72;
+const PADDLE_HEIGHT: f32 = 0.66;
 const PADDLE_RADIUS: f32 = 0.4;
 const PADDLE_SPEED: f32 = 15.;
 
@@ -46,7 +46,7 @@ fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player
         player,
         get_input_map(&player),
         RigidBody::Dynamic,
-        paddle_collider.clone(),
+        paddle_collider,
         Friction::new(0.),
         LockedAxes::new()
             .lock_rotation_x()

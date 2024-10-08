@@ -8,9 +8,9 @@ use bevy::prelude::{
 };
 use rand::Rng;
 
-const INITIAL_VELOCITY: f32 = 10.0;
+const INITIAL_VELOCITY: f32 = 20.0;
 const PUCK_RADIUS: f32 = 0.25;
-const PUCK_HEIGHT: f32 = 0.2;
+const PUCK_HEIGHT: f32 = 0.08;
 
 #[derive(Component)]
 pub(crate) struct Puck;
@@ -39,7 +39,7 @@ pub fn add_puck(
         MaterialMeshBundle {
             mesh,
             material,
-            transform: Transform::from_xyz(0.0, 0.25, 0.0),
+            transform: Transform::from_xyz(0.0, 0.2, 0.0),
             ..default()
         },
         RigidBody::Dynamic,
@@ -50,7 +50,7 @@ pub fn add_puck(
             INITIAL_VELOCITY * f32::sin(angle),
         )),
         Mass(1.),
-        Restitution::new(1.).with_combine_rule(CoefficientCombine::Max),
+        Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         Puck,
     ));
 }

@@ -1,7 +1,7 @@
 use crate::plugin::paddle::Player;
 use crate::plugin::shake::Shake;
 use avian3d::prelude::{
-    CoefficientCombine, Collider, ColliderConstructor, Friction, RigidBody, Sensor,
+    CoefficientCombine, Collider, ColliderConstructor, Friction, Restitution, RigidBody, Sensor,
 };
 use bevy::asset::{AssetServer, Assets};
 use bevy::color::palettes::css::WHITE;
@@ -9,8 +9,8 @@ use bevy::core::Name;
 use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{
-    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid,
-    MaterialMeshBundle, Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
+    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
+    Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
 };
 
 #[derive(Component)]
@@ -51,6 +51,7 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             shadows_enabled: true,
             ..default()
         },
+
         ..default()
     });
 
@@ -64,6 +65,7 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
+        Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         RigidBody::Static,
         ColliderConstructor::TrimeshFromMesh,
     ));
