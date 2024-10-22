@@ -12,7 +12,7 @@ use avian3d::prelude::Gravity;
 use avian3d::PhysicsPlugins;
 use bevy::app::{Startup, Update};
 use bevy::prelude::{in_state, App, AppExtStates, IntoSystemConfigs, OnEnter, Plugin};
-use leafwing_input_manager::prelude::InputManagerPlugin;
+use leafwing_input_manager::plugin::InputManagerPlugin;
 
 mod kickoff;
 mod paddle;

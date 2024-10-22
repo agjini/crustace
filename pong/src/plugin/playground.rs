@@ -7,10 +7,10 @@ use bevy::asset::{AssetServer, Assets};
 use bevy::color::palettes::css::WHITE;
 use bevy::core::Name;
 use bevy::math::Vec3;
-use bevy::pbr::StandardMaterial;
+use bevy::pbr::{PbrBundle, StandardMaterial};
 use bevy::prelude::{
     default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
-    Mesh, PbrBundle, PointLight, PointLightBundle, Res, ResMut, Transform,
+    Mesh, PointLight, PointLightBundle, Res, ResMut, Transform,
 };
 
 #[derive(Component)]
