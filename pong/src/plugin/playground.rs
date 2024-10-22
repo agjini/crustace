@@ -6,11 +6,12 @@ use avian3d::prelude::{
 use bevy::asset::{AssetServer, Assets};
 use bevy::color::palettes::css::WHITE;
 use bevy::core::Name;
+use bevy::core_pipeline::Skybox;
 use bevy::math::Vec3;
 use bevy::pbr::{PbrBundle, StandardMaterial};
 use bevy::prelude::{
-    default, AmbientLight, Camera3dBundle, Color, Commands, Component, Cuboid, MaterialMeshBundle,
-    Mesh, PointLight, PointLightBundle, Res, ResMut, Transform,
+    default, AmbientLight, Camera, Camera3dBundle, Color, Commands, Component, Cuboid,
+    MaterialMeshBundle, Mesh, PointLight, PointLightBundle, Res, ResMut, Transform,
 };
 
 #[derive(Component)]
@@ -30,11 +31,21 @@ pub const WALL_WIDTH: f32 = 100.0;
 pub const MARGIN: f32 = 10.;
 
 pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // let skybox = asset_server.load("kloofendal_48d_partly_cloudy_puresky_2k.hdr");
+
     commands.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
+            camera: Camera {
+                hdr: true,
+                ..default()
+            },
             ..default()
         },
+        // Skybox {
+        //     image: skybox,
+        //     brightness: 1000.0,
+        // },
         Shake::new(0., 0.6, 15.),
     ));
 
