@@ -4,15 +4,10 @@ use avian3d::prelude::{
     CoefficientCombine, Collider, ColliderConstructor, Friction, Restitution, RigidBody, Sensor,
 };
 use bevy::asset::{AssetServer, Assets};
-use bevy::color::palettes::css::WHITE;
 use bevy::core::Name;
-use bevy::core_pipeline::Skybox;
 use bevy::math::Vec3;
 use bevy::pbr::{PbrBundle, StandardMaterial};
-use bevy::prelude::{
-    default, AmbientLight, Camera, Camera3dBundle, Color, Commands, Component, Cuboid,
-    MaterialMeshBundle, Mesh, PointLight, PointLightBundle, Res, ResMut, Transform,
-};
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -37,34 +32,35 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         Camera3dBundle {
             transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
             camera: Camera {
-                hdr: true,
+                // hdr: true,
                 ..default()
             },
             ..default()
         },
-        // Skybox {
-        //     image: skybox,
-        //     brightness: 1000.0,
-        // },
+        EnvironmentMapLight {
+            diffuse_map: asset_server.load("environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
+            specular_map: asset_server.load("environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
+            intensity: 900.0,
+        },
         Shake::new(0., 0.6, 15.),
     ));
 
-    commands.insert_resource(AmbientLight {
-        color: Color::WHITE,
-        brightness: 100.,
-    });
+    // commands.insert_resource(AmbientLight {
+    //     color: Color::WHITE,
+    //     brightness: 100.,
+    // });
 
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(1.0, 5.0, 0.0),
-        point_light: PointLight {
-            intensity: 600_000.0,
-            color: WHITE.into(),
-            shadows_enabled: true,
-            ..default()
-        },
+    // commands.spawn(PointLightBundle {
+    //     transform: Transform::from_xyz(1.0, 5.0, 0.0),
+    //     point_light: PointLight {
+    //         intensity: 600_000.0,
+    //         color: WHITE.into(),
+    //         shadows_enabled: true,
+    //         ..default()
+    //     },
 
-        ..default()
-    });
+    //     ..default()
+    // });
 
     let mesh = asset_server.load("blueprints/Playground.glb#Mesh0/Primitive0");
     let material = asset_server.load("materials/PlaygroundMaterial.glb#Material0");

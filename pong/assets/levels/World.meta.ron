@@ -6,5 +6,6 @@
     ("Paddle", File ( path: "blueprints/Paddle.glb" )),
     ("MaterialLeft", File ( path: "materials/MaterialLeft.glb" )),
     ("Puck", File ( path: "blueprints/Puck.glb" )),
+    ("Puck", File ( path: "materials/Puck.glb" )),
    ]
 )
