@@ -3,8 +3,8 @@ use avian3d::prelude::{
 };
 use bevy::asset::AssetServer;
 use bevy::prelude::{
-    default, Commands, Component, Gamepad, Name, PbrBundle, Query, Reflect, Res, Transform, Vec3,
-    With,
+    default, Assets, Color, Commands, Component, Gamepad, Mut, Name, PbrBundle, Query, Reflect,
+    Res, ResMut, StandardMaterial, Transform, Vec3, With,
 };
 use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
@@ -22,15 +22,31 @@ pub enum Player {
     Right,
 }
 
-pub fn add_paddle(mut commands: Commands, asset_server: Res<AssetServer>) {
-    spawn_paddle(&mut commands, &asset_server, Player::Left);
-    spawn_paddle(&mut commands, &asset_server, Player::Right);
+pub fn add_paddle(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
+) {
+    spawn_paddle(&mut commands, &asset_server, &mut materials, Player::Left);
+    spawn_paddle(&mut commands, &asset_server, &mut materials, Player::Right);
 }
 
-fn spawn_paddle(commands: &mut Commands, asset_server: &Res<AssetServer>, player: Player) {
+fn spawn_paddle(
+    commands: &mut Commands,
+    asset_server: &Res<AssetServer>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    player: Player,
+) {
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
     let mesh = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
-    let material = asset_server.load(format!("materials/Material{player:?}.glb#Material0"));
+    let material = materials.add(StandardMaterial {
+        base_color: match player {
+            Player::Left => Color::rgb(0.0, 0.0, 0.7),
+            Player::Right => Color::rgb(0.7, 0.0, 0.0),
+        },
+        ..default()
+    });
+    //let material = asset_server.load(format!("blueprints/Paddle.glb#Material{player:?}"));
     commands.spawn((
         Name::new(format!("Paddle {player:?}")),
         PbrBundle {

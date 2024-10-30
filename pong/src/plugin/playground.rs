@@ -1,12 +1,10 @@
 use crate::plugin::paddle::Player;
 use crate::plugin::shake::Shake;
-use avian3d::prelude::{
-    CoefficientCombine, Collider, ColliderConstructor, Friction, Restitution, RigidBody, Sensor,
-};
+use avian3d::prelude::{CoefficientCombine, Collider, Friction, Restitution, RigidBody, Sensor};
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::math::Vec3;
-use bevy::pbr::{PbrBundle, StandardMaterial};
+use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -38,8 +36,8 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         EnvironmentMapLight {
-            diffuse_map: asset_server.load("environment_maps/pisa_diffuse_rgb9e5_zstd.ktx2"),
-            specular_map: asset_server.load("environment_maps/pisa_specular_rgb9e5_zstd.ktx2"),
+            diffuse_map: asset_server.load("textures/pisa_diffuse_rgb9e5_zstd.ktx2"),
+            specular_map: asset_server.load("textures/pisa_specular_rgb9e5_zstd.ktx2"),
             intensity: 900.0,
         },
         Shake::new(0., 0.6, 15.),
@@ -62,19 +60,14 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     //     ..default()
     // });
 
-    let mesh = asset_server.load("blueprints/Playground.glb#Mesh0/Primitive0");
-    let material = asset_server.load("materials/PlaygroundMaterial.glb#Material0");
+    let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
         Name::new("Playground"),
-        PbrBundle {
-            mesh,
-            material,
-            ..default()
-        },
+        SceneBundle { scene, ..default() },
         Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
         Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         RigidBody::Static,
-        ColliderConstructor::TrimeshFromMesh,
+        // ColliderConstructor::TrimeshFromMesh,
     ));
 }
 
