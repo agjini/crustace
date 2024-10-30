@@ -1,6 +1,9 @@
 use crate::plugin::paddle::Player;
 use crate::plugin::shake::Shake;
-use avian3d::prelude::{CoefficientCombine, Collider, Friction, Restitution, RigidBody, Sensor};
+use avian3d::prelude::{
+    CoefficientCombine, Collider, ColliderConstructor, ColliderConstructorHierarchy, Friction,
+    Restitution, RigidBody, Sensor,
+};
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::math::Vec3;
@@ -48,17 +51,18 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     //     brightness: 100.,
     // });
 
-    // commands.spawn(PointLightBundle {
-    //     transform: Transform::from_xyz(1.0, 5.0, 0.0),
-    //     point_light: PointLight {
-    //         intensity: 600_000.0,
-    //         color: WHITE.into(),
-    //         shadows_enabled: true,
-    //         ..default()
-    //     },
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(1.0, 5.0, 0.0),
+        point_light: PointLight {
+            intensity: 1.0,
+            color: Color::srgb(210.0, 17., 13.),
+            radius: 0.02,
+            shadows_enabled: true,
+            ..default()
+        },
 
-    //     ..default()
-    // });
+        ..default()
+    });
 
     let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
@@ -67,7 +71,7 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
         Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         RigidBody::Static,
-        // ColliderConstructor::TrimeshFromMesh,
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
     ));
 }
 
