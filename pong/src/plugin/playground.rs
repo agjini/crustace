@@ -60,10 +60,20 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             shadows_enabled: true,
             ..default()
         },
-
         ..default()
     });
 
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(1.0, 5.0, -3.0),
+        point_light: PointLight {
+            intensity: 2.0,
+            color: Color::srgb(210.0, 17., 13.),
+            radius: 0.02,
+            shadows_enabled: true,
+            ..default()
+        },
+        ..default()
+    });
     let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
         Name::new("Playground"),
