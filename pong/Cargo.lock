@@ -612,6 +612,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_easings"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e26918df5c47bffbe41840a1f6278b42e02cd2ec73605eca5e6fbfe08eecfe7"
+dependencies = [
+ "bevy",
+ "interpolation",
+]
+
+[[package]]
 name = "bevy_ecs"
 version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -854,6 +864,22 @@ dependencies = [
  "quote",
  "syn 2.0.82",
  "toml_edit",
+]
+
+[[package]]
+name = "bevy_map_camera"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "003eaf8469fa1c81aa3d6bb119fa01c8eb78c68e958c541d9fb22e296ed1b571"
+dependencies = [
+ "approx",
+ "bevy",
+ "bevy_easings",
+ "bevy_input",
+ "bevy_tweening",
+ "log",
+ "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -1141,6 +1167,16 @@ dependencies = [
  "bevy_reflect",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "bevy_tweening"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10da5cd8ed93feb3f2d30c6c4651f5422584c4cf0c7f0ed4b29913a0df1250f0"
+dependencies = [
+ "bevy",
+ "interpolation",
 ]
 
 [[package]]
@@ -2465,6 +2501,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "interpolation"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9c13ae9d91148fcb4aab6654c4c2a7d02a15395ea9e23f65170f175f8b269ce"
+
+[[package]]
 name = "io-kit-sys"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3480,6 +3522,7 @@ dependencies = [
  "avian3d",
  "bevy",
  "bevy-inspector-egui",
+ "bevy_map_camera",
  "leafwing-input-manager",
  "noise",
  "rand",

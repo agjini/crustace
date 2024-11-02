@@ -9,6 +9,7 @@ use bevy::core::Name;
 use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
+use bevy_map_camera::MapCameraBundle;
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -30,10 +31,13 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     // let skybox = asset_server.load("kloofendal_48d_partly_cloudy_puresky_2k.hdr");
 
     commands.spawn((
-        Camera3dBundle {
-            transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
-            camera: Camera {
-                // hdr: true,
+        MapCameraBundle {
+            camera_3d: Camera3dBundle {
+                transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
+                camera: Camera {
+                    hdr: true,
+                    ..default()
+                },
                 ..default()
             },
             ..default()
@@ -41,7 +45,7 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         EnvironmentMapLight {
             diffuse_map: asset_server.load("textures/pisa_diffuse_rgb9e5_zstd.ktx2"),
             specular_map: asset_server.load("textures/pisa_specular_rgb9e5_zstd.ktx2"),
-            intensity: 900.0,
+            intensity: 100.0,
         },
         Shake::new(0., 0.6, 15.),
     ));
