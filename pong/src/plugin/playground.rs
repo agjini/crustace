@@ -6,6 +6,7 @@ use avian3d::prelude::{
 };
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
+use bevy::core_pipeline::Skybox;
 use bevy::math::Vec3;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
@@ -28,9 +29,13 @@ pub const WALL_WIDTH: f32 = 100.0;
 pub const MARGIN: f32 = 10.;
 
 pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // let skybox = asset_server.load("kloofendal_48d_partly_cloudy_puresky_2k.hdr");
+    let skybox = asset_server.load("textures/skybox.ktx2");
 
     commands.spawn((
+        Skybox {
+            image: skybox,
+            brightness: 1000.,
+        },
         MapCameraBundle {
             camera_3d: Camera3dBundle {
                 transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
@@ -43,41 +48,35 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         EnvironmentMapLight {
-            diffuse_map: asset_server.load("textures/pisa_diffuse_rgb9e5_zstd.ktx2"),
-            specular_map: asset_server.load("textures/pisa_specular_rgb9e5_zstd.ktx2"),
+            diffuse_map: asset_server.load("textures/diffuse_map.ktx2"),
+            specular_map: asset_server.load("textures/skybox.ktx2"),
             intensity: 1000.0,
         },
         Shake::new(0., 0.6, 15.),
     ));
-
-    commands.insert_resource(AmbientLight {
-        color: Color::WHITE,
-        brightness: 100.,
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(1.0, 5.0, 0.0),
+        point_light: PointLight {
+            intensity: 1.0,
+            color: Color::srgb(210.0, 17., 13.),
+            radius: 0.02,
+            shadows_enabled: true,
+            ..default()
+        },
+        ..default()
     });
-    //
-    // commands.spawn(PointLightBundle {
-    //     transform: Transform::from_xyz(1.0, 5.0, 0.0),
-    //     point_light: PointLight {
-    //         intensity: 1.0,
-    //         color: Color::srgb(210.0, 17., 13.),
-    //         radius: 0.02,
-    //         shadows_enabled: true,
-    //         ..default()
-    //     },
-    //     ..default()
-    // });
-    //
-    // commands.spawn(PointLightBundle {
-    //     transform: Transform::from_xyz(1.0, 5.0, -3.0),
-    //     point_light: PointLight {
-    //         intensity: 2.0,
-    //         color: Color::srgb(210.0, 17., 13.),
-    //         radius: 0.02,
-    //         shadows_enabled: true,
-    //         ..default()
-    //     },
-    //     ..default()
-    // });
+
+    commands.spawn(PointLightBundle {
+        transform: Transform::from_xyz(1.0, 5.0, -3.0),
+        point_light: PointLight {
+            intensity: 2.0,
+            color: Color::srgb(210.0, 17., 13.),
+            radius: 0.02,
+            shadows_enabled: true,
+            ..default()
+        },
+        ..default()
+    });
     let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
         Name::new("Playground"),

@@ -1,0 +1,7 @@
+assets/textures/pisa_specular_rgb9e5_zstd.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/skybox.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/sky_skybox.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/specular_map.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/cubes_reflection_probe_specular_rgb9e5_zstd.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/diffuse_map.ktx2 filter=lfs diff=lfs merge=lfs -text
+assets/textures/pisa_diffuse_rgb9e5_zstd.ktx2 filter=lfs diff=lfs merge=lfs -text
