@@ -12,6 +12,8 @@ use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
 use bevy_map_camera::MapCameraBundle;
 
+use super::camera_controller::CameraController;
+
 #[derive(Component)]
 pub struct Goal(pub Player);
 
@@ -36,17 +38,15 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             image: skybox,
             brightness: 1000.,
         },
-        MapCameraBundle {
-            camera_3d: Camera3dBundle {
-                transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
-                camera: Camera {
-                    hdr: true,
-                    ..default()
-                },
+        Camera3dBundle {
+            transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
+            camera: Camera {
+                hdr: true,
                 ..default()
             },
             ..default()
         },
+        CameraController::default(),
         EnvironmentMapLight {
             diffuse_map: asset_server.load("textures/diffuse_map.ktx2"),
             specular_map: asset_server.load("textures/skybox.ktx2"),
@@ -54,29 +54,29 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Shake::new(0., 0.6, 15.),
     ));
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(1.0, 5.0, 0.0),
-        point_light: PointLight {
-            intensity: 1.0,
-            color: Color::srgb(210.0, 17., 13.),
-            radius: 0.02,
-            shadows_enabled: true,
-            ..default()
-        },
-        ..default()
-    });
+    // commands.spawn(PointLightBundle {
+    //     transform: Transform::from_xyz(1.0, 5.0, 0.0),
+    //     point_light: PointLight {
+    //         intensity: 1.0,
+    //         color: Color::srgb(210.0, 17., 13.),
+    //         radius: 0.02,
+    //         shadows_enabled: true,
+    //         ..default()
+    //     },
+    //     ..default()
+    // });
 
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(1.0, 5.0, -3.0),
-        point_light: PointLight {
-            intensity: 2.0,
-            color: Color::srgb(210.0, 17., 13.),
-            radius: 0.02,
-            shadows_enabled: true,
-            ..default()
-        },
-        ..default()
-    });
+    // commands.spawn(PointLightBundle {
+    //     transform: Transform::from_xyz(1.0, 5.0, -3.0),
+    //     point_light: PointLight {
+    //         intensity: 2.0,
+    //         color: Color::srgb(210.0, 17., 13.),
+    //         radius: 0.02,
+    //         shadows_enabled: true,
+    //         ..default()
+    //     },
+    //     ..default()
+    // });
     let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
         Name::new("Playground"),
