@@ -4,15 +4,12 @@ use avian3d::prelude::{
     CoefficientCombine, Collider, ColliderConstructor, ColliderConstructorHierarchy, Friction,
     Restitution, RigidBody, Sensor,
 };
-use bevy::asset::{AssetServer, Assets};
+use bevy::asset::AssetServer;
 use bevy::core::Name;
 use bevy::core_pipeline::Skybox;
 use bevy::math::Vec3;
-use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
-use bevy_map_camera::MapCameraBundle;
-
-use super::camera_controller::CameraController;
+use bevy_map_camera::{LookTransform, MapCameraBundle};
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -25,10 +22,9 @@ pub enum Position {
     Left,
 }
 
-pub const WIDTH: f32 = 1024.0;
-pub const HEIGHT: f32 = 768.0;
-pub const WALL_WIDTH: f32 = 100.0;
-pub const MARGIN: f32 = 10.;
+pub const WIDTH: f32 = 16.0;
+pub const HEIGHT: f32 = 2.0;
+pub const WALL_WIDTH: f32 = 0.5;
 
 pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     let skybox = asset_server.load("textures/skybox.ktx2");
@@ -38,15 +34,15 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             image: skybox,
             brightness: 1000.,
         },
-        Camera3dBundle {
-            transform: Transform::from_xyz(0., 11.5, 13.8).looking_at(Vec3::ZERO, Vec3::Y),
-            camera: Camera {
-                hdr: true,
-                ..default()
+        MapCameraBundle::new_with_transform(LookTransform::new(
+            Vec3 {
+                x: 0.,
+                y: 11.5,
+                z: 13.8,
             },
-            ..default()
-        },
-        CameraController::default(),
+            Vec3::ZERO,
+            Vec3::Y,
+        )),
         EnvironmentMapLight {
             diffuse_map: asset_server.load("textures/diffuse_map.ktx2"),
             specular_map: asset_server.load("textures/skybox.ktx2"),
@@ -86,78 +82,28 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         RigidBody::Static,
         ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
     ));
+    spawn_goal(Player::Left, &mut commands);
+    spawn_goal(Player::Right, &mut commands);
 }
 
-fn spawn_wall(
-    position: Position,
-    commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-) {
-    let (width, height, x, z) = match position {
-        Position::Top => (
-            WIDTH + WALL_WIDTH * 2.,
-            WALL_WIDTH,
-            0.0,
-            -HEIGHT / 2. - WALL_WIDTH / 2.,
-        ),
-        Position::Right => (WALL_WIDTH, HEIGHT, WIDTH / 2. + WALL_WIDTH / 2., 0.0),
-        Position::Bottom => (
-            WIDTH + WALL_WIDTH * 2.,
-            WALL_WIDTH,
-            0.0,
-            HEIGHT / 2. + WALL_WIDTH / 2.,
-        ),
-        Position::Left => (WALL_WIDTH, HEIGHT, -WIDTH / 2. - WALL_WIDTH / 2., 0.0),
-    };
-
-    let mesh = meshes.add(Cuboid::new(width, 50., height));
-    commands.spawn((
-        Name::new(format!("WALL {position:?}")),
-        MaterialMeshBundle {
-            mesh,
-            material: materials.add(Color::srgb(0.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(x, 25., z),
-            ..default()
-        },
-        Collider::cuboid(width, 50., height),
-        RigidBody::Static,
-    ));
-}
-
-fn spawn_goal(
-    player: Player,
-    commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-) {
-    let goal_width = WALL_WIDTH;
-    let goal_height = HEIGHT / 4.;
-    let (width, height, x, z) = match player {
-        Player::Left => (
-            goal_width,
-            goal_height,
-            -WIDTH / 2. - goal_width / 2. + 5.,
-            0.0,
-        ),
+fn spawn_goal(player: Player, commands: &mut Commands) {
+    let goal_depth = WALL_WIDTH;
+    let goal_width = 2.2;
+    let goal_height = 0.5;
+    let (width, depth, x, z) = match player {
         Player::Right => (
+            goal_depth,
             goal_width,
-            goal_height,
-            WIDTH / 2. + goal_width / 2. - 5.,
+            goal_depth / 2. + WIDTH / 2. - WALL_WIDTH,
             0.0,
-        ),
+        ), // blue
+        Player::Left => (goal_depth, goal_width, goal_depth / 2. - WIDTH / 2., 0.0), // red
     };
 
-    let mesh = meshes.add(Cuboid::new(width, 60., height));
     commands.spawn((
         Name::new(format!("GOAL {player:?}")),
-        MaterialMeshBundle {
-            mesh,
-            material: materials.add(Color::srgb(1.0, 0.0, 0.0)),
-            transform: Transform::from_xyz(x, 25., z),
-            ..default()
-        },
-        Collider::cuboid(width, 60., height),
+        Transform::from_xyz(x, goal_height / 2., z),
+        Collider::cuboid(width, goal_height, depth),
         Sensor::default(),
         Goal(player),
         RigidBody::Static,
