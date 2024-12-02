@@ -1,11 +1,11 @@
-use crate::plugin::state::AppState;
-use avian3d::prelude::ExternalImpulse;
-use avian3d::prelude::{CoefficientCombine, Collider, LockedAxes, Mass, Restitution, RigidBody};
+use avian3d::prelude::{
+    CoefficientCombine, Collider, LinearVelocity, LockedAxes, Mass, Restitution, RigidBody,
+};
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::prelude::{
-    default, Color, Commands, Component, MaterialMeshBundle, Res, ResMut, StandardMaterial,
-    StateScoped, Transform, Vec3,
+    default, Color, Commands, Component, MaterialMeshBundle, Query, Res, ResMut, StandardMaterial,
+    Transform, Vec3, With,
 };
 use rand::Rng;
 
@@ -45,14 +45,15 @@ pub fn add_puck(
         },
         RigidBody::Dynamic,
         Collider::cylinder(PUCK_RADIUS, PUCK_HEIGHT),
-        ExternalImpulse::new(Vec3::new(
-            INITIAL_VELOCITY * f32::cos(angle),
-            0.0,
-            INITIAL_VELOCITY * f32::sin(angle),
-        )),
         Mass(1.),
         Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         Puck,
-        StateScoped(AppState::InGame),
     ));
+}
+
+pub fn reset_puck(mut puck: Query<(&mut Transform, &mut LinearVelocity), With<Puck>>) {
+    let (mut transform, mut velocity) = puck.single_mut();
+    transform.translation.x = 0.0;
+    transform.translation.z = 0.0;
+    velocity.0 = Vec3::ZERO;
 }

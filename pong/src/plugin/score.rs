@@ -70,12 +70,7 @@ pub fn check_goal(
     mut collision_event_reader: EventReader<CollisionStarted>,
     mut goal_event_writer: EventWriter<GoalEvent>,
 ) {
-    let puck_entity = puck.get_single().ok();
-    if let None = puck_entity {
-        return;
-    }
-
-    let puck = puck_entity.unwrap();
+    let puck = puck.single();
     for CollisionStarted(e1, e2) in collision_event_reader.read() {
         if *e1 != puck && *e2 != puck {
             continue;
@@ -111,12 +106,12 @@ pub fn shake_on_goal(mut goals: EventReader<GoalEvent>, mut shake_query: Query<&
     }
 }
 
-pub fn kickoff_on_goal(
+pub fn goal_state_on_goal(
     mut goals: EventReader<GoalEvent>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     if goals.read().len() == 0 {
         return;
     }
-    next_state.set(AppState::KickOff);
+    next_state.set(AppState::Goal);
 }
