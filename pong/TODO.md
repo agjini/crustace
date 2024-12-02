@@ -10,7 +10,8 @@ Publier une V1 sous le nom "team crustace"
 
 ## Fonctionalités
 
-- lorsqu'on marque un but : remettre la balle au milieu
+- kick off = remise en jeu au centre, le dernier joueur qui a marqué un but commence
+- puck plus large
 - liberté de mouvement des paddle : séparation au milieu (invisible)
 - sons
 - tester le gameplay
@@ -27,5 +28,7 @@ Publier une V1 sous le nom "team crustace"
 - différentes vues de caméra
 
 # DONE :
+
+- lorsqu'on marque un but : remettre la balle au milieu
 - fixer la camera pour que le playground soit centré au démarrage
 - remettre le fait de marquer un but

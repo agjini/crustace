@@ -1,13 +1,14 @@
 use avian3d::prelude::CollisionStarted;
 use bevy::prelude::{
-    default, Commands, Component, Entity, Event, EventReader, EventWriter, JustifyText,
-    PositionType, Query, Style, Text, TextBundle, TextStyle, Val, With,
+    default, Commands, Component, Entity, Event, EventReader, EventWriter, JustifyText, NextState,
+    PositionType, Query, ResMut, Style, Text, TextBundle, TextStyle, Val, With,
 };
 
 use crate::plugin::paddle::Player;
 use crate::plugin::playground::Goal;
 use crate::plugin::puck::Puck;
 use crate::plugin::shake::Shake;
+use crate::plugin::state::AppState;
 
 #[derive(Component)]
 pub struct Score(pub u8);
@@ -108,4 +109,14 @@ pub fn shake_on_goal(mut goals: EventReader<GoalEvent>, mut shake_query: Query<&
     for mut shake in shake_query.iter_mut() {
         shake.add_time(0.45);
     }
+}
+
+pub fn kickoff_on_goal(
+    mut goals: EventReader<GoalEvent>,
+    mut next_state: ResMut<NextState<AppState>>,
+) {
+    if goals.read().len() == 0 {
+        return;
+    }
+    next_state.set(AppState::KickOff);
 }

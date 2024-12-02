@@ -3,7 +3,8 @@ use crate::plugin::paddle::{add_paddle, move_paddle, Action, Paddle, Player};
 use crate::plugin::playground::add_playground;
 use crate::plugin::puck::add_puck;
 use crate::plugin::score::{
-    check_goal, display_score, increment_score_on_goal, shake_on_goal, update_score, GoalEvent,
+    check_goal, display_score, increment_score_on_goal, kickoff_on_goal, shake_on_goal,
+    update_score, GoalEvent,
 };
 use crate::plugin::shake::ShakePlugin;
 use crate::plugin::state::AppState;
@@ -46,6 +47,7 @@ impl Plugin for PongPlugin {
             .add_systems(Update, check_goal)
             .add_systems(Update, increment_score_on_goal)
             .add_systems(Update, shake_on_goal)
+            .add_systems(Update, kickoff_on_goal)
             .add_systems(Update, move_paddle)
             .add_systems(Update, update_score)
             .add_systems(OnEnter(AppState::Goal), to_kickoff);

@@ -1,10 +1,11 @@
+use crate::plugin::state::AppState;
 use avian3d::prelude::ExternalImpulse;
 use avian3d::prelude::{CoefficientCombine, Collider, LockedAxes, Mass, Restitution, RigidBody};
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
 use bevy::prelude::{
     default, Color, Commands, Component, MaterialMeshBundle, Res, ResMut, StandardMaterial,
-    Transform, Vec3,
+    StateScoped, Transform, Vec3,
 };
 use rand::Rng;
 
@@ -52,5 +53,6 @@ pub fn add_puck(
         Mass(1.),
         Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         Puck,
+        StateScoped(AppState::InGame),
     ));
 }
