@@ -15,7 +15,6 @@ use bevy::prelude::{in_state, App, AppExtStates, IntoSystemConfigs, OnEnter, Plu
 use bevy_map_camera::MapCameraPlugin;
 use leafwing_input_manager::plugin::InputManagerPlugin;
 
-mod camera_controller;
 mod kickoff;
 mod paddle;
 mod playground;

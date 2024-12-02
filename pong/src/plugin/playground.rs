@@ -22,8 +22,8 @@ pub enum Position {
     Left,
 }
 
-pub const WIDTH: f32 = 16.0;
-pub const HEIGHT: f32 = 2.0;
+pub const PLAYGROUND_WIDTH: f32 = 16.0;
+pub const PLAYGROUND_HEIGHT: f32 = 2.0;
 pub const WALL_WIDTH: f32 = 0.5;
 
 pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -90,20 +90,15 @@ fn spawn_goal(player: Player, commands: &mut Commands) {
     let goal_depth = WALL_WIDTH;
     let goal_width = 2.2;
     let goal_height = 0.5;
-    let (width, depth, x, z) = match player {
-        Player::Right => (
-            goal_depth,
-            goal_width,
-            goal_depth / 2. + WIDTH / 2. - WALL_WIDTH,
-            0.0,
-        ), // blue
-        Player::Left => (goal_depth, goal_width, goal_depth / 2. - WIDTH / 2., 0.0), // red
+    let x = match player {
+        Player::Left => goal_depth / 2. - PLAYGROUND_WIDTH / 2. - (goal_depth / 2.),
+        Player::Right => goal_depth / 2. + PLAYGROUND_WIDTH / 2. - WALL_WIDTH + (goal_depth / 2.),
     };
 
     commands.spawn((
         Name::new(format!("GOAL {player:?}")),
-        Transform::from_xyz(x, goal_height / 2., z),
-        Collider::cuboid(width, goal_height, depth),
+        Transform::from_xyz(x, goal_height / 2., 0.),
+        Collider::cuboid(goal_depth, goal_height, goal_width),
         Sensor::default(),
         Goal(player),
         RigidBody::Static,
