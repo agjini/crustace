@@ -23,7 +23,7 @@ Download an HDRi image in .hdr format (from Poly Haven or similar website).
 Clone this project
 
 ```bash
-cargo install --git https://github.com/bytestring-net/bevy_skybox_cli
+cargo install --git https://github.com/bytestring-net/bevy_skybox_cli bevy_skybox_cli
 ```
 
 Go inside the project
