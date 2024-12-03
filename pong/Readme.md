@@ -36,4 +36,8 @@ cd /home/agjini/workspace/third/bevy_skybox_cli
 bevy_skybox_cli /home/agjini/Downloads/abandoned_workshop_02_8k.hdr
 ```
 
-The generated textures files appears in the folder `/home/agjini/Downloads/`
+The generated textures files appears in the folder `/home/agjini/Downloads/` ready to use in the bevy game :
+- diffuse_map.ktx2
+- skybox.ktx2
+- specular_map.ktx2
+
