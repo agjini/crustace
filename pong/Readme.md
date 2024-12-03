@@ -18,14 +18,12 @@ Download an HDRi image in .hdr format (from Poly Haven or similar website).
 
 `/home/agjini/Downloads/abandoned_workshop_02_8k.hdr`
 
-```bash
-
 # Generate KTX2 Textures
 
 Clone this project
 
 ```bash
-git clone https://github.com/bytestring-net/bevy_skybox_cli
+cargo install --git https://github.com/bytestring-net/bevy_skybox_cli
 ```
 
 Go inside the project
@@ -35,5 +33,7 @@ Go inside the project
 cd /home/agjini/workspace/third/bevy_skybox_cli
 
 # Generate the skybox
-cargo run --release /home/agjini/Downloads/abandoned_workshop_02_8k.hdr
+bevy_skybox_cli /home/agjini/Downloads/abandoned_workshop_02_8k.hdr
 ```
+
+The generated textures files appears in the folder `/home/agjini/Downloads/`
