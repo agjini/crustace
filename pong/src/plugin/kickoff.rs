@@ -1,36 +1,30 @@
-use bevy::input::gamepad::GamepadButtonInput;
+use crate::plugin::state::AppState;
+use bevy::input::gamepad::GamepadButtonStateChangedEvent;
 use bevy::input::ButtonInput;
 use bevy::prelude::{
-    default, Commands, EventReader, JustifyText, KeyCode, NextState, PositionType, Res, ResMut,
-    StateScoped, Style, TextBundle, TextStyle, Val,
+    default, Commands, EventReader, JustifyText, KeyCode, NextState, Node, PositionType, Res,
+    ResMut, StateScoped, Text, TextFont, TextLayout, Val,
 };
-
-use crate::plugin::state::AppState;
 
 pub fn display_action(mut commands: Commands) {
     commands.spawn((
         StateScoped(AppState::KickOff),
-        TextBundle::from_section(
-            "press space to start",
-            TextStyle {
-                font_size: 50.0,
-                ..default()
-            },
-        )
-        .with_text_justify(JustifyText::Center)
-        .with_style(Style {
+        Text::new("Press space to start"),
+        TextFont::default().with_font_size(50.0),
+        TextLayout::new_with_justify(JustifyText::Center),
+        Node {
             position_type: PositionType::Absolute,
             bottom: Val::Px(5.0),
             right: Val::Px(5.0),
             ..default()
-        }),
+        },
     ));
 }
 
 pub fn kickoff(
     keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<AppState>>,
-    mut gamepad_button: EventReader<GamepadButtonInput>,
+    mut gamepad_button: EventReader<GamepadButtonStateChangedEvent>,
 ) {
     if keys.just_pressed(KeyCode::Space) {
         next_state.set(AppState::InGame);

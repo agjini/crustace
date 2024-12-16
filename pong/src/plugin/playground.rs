@@ -9,7 +9,7 @@ use bevy::core::Name;
 use bevy::core_pipeline::Skybox;
 use bevy::math::Vec3;
 use bevy::prelude::*;
-use bevy_map_camera::{LookTransform, MapCameraBundle};
+use bevy_map_camera::{LookTransform, MapCamera};
 
 #[derive(Component)]
 pub struct Goal(pub Player);
@@ -33,8 +33,10 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
         Skybox {
             image: skybox,
             brightness: 1000.,
+            ..Skybox::default()
         },
-        MapCameraBundle::new_with_transform(LookTransform::new(
+        MapCamera,
+        LookTransform::new(
             Vec3 {
                 x: 0.,
                 y: 11.5,
@@ -42,11 +44,12 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             Vec3::ZERO,
             Vec3::Y,
-        )),
+        ),
         EnvironmentMapLight {
             diffuse_map: asset_server.load("textures/diffuse_map.ktx2"),
             specular_map: asset_server.load("textures/skybox.ktx2"),
             intensity: 1000.0,
+            ..EnvironmentMapLight::default()
         },
         Shake::new(0., 0.6, 15.),
     ));
@@ -76,7 +79,7 @@ pub fn add_playground(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scene = asset_server.load("blueprints/Playground.glb#Scene0");
     commands.spawn((
         Name::new("Playground"),
-        SceneBundle { scene, ..default() },
+        SceneRoot(scene),
         Friction::new(0.).with_combine_rule(CoefficientCombine::Min),
         Restitution::new(1.).with_combine_rule(CoefficientCombine::Min),
         RigidBody::Static,

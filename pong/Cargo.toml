@@ -12,10 +12,10 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
-avian3d = "0.1.2"
-bevy = { version = "0.14.2", features = ["dynamic_linking"] }
-bevy-inspector-egui = "0.26.0"
-bevy_map_camera = "0.1.5"
-leafwing-input-manager = "0.15.0"
+avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
+bevy = { version = "0.15.0", features = ["dynamic_linking"] }
+bevy-inspector-egui = "0.28.0"
+bevy_map_camera = "0.2.0"
+leafwing-input-manager = "0.16.0"
 noise = "0.9.0"
 rand = "0.8.5"

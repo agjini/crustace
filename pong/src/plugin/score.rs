@@ -1,7 +1,7 @@
 use avian3d::prelude::CollisionStarted;
 use bevy::prelude::{
     default, Commands, Component, Entity, Event, EventReader, EventWriter, JustifyText, NextState,
-    PositionType, Query, ResMut, Style, Text, TextBundle, TextStyle, Val, With,
+    Node, PositionType, Query, ResMut, Text, TextFont, TextLayout, Val, With,
 };
 
 use crate::plugin::paddle::Player;
@@ -15,39 +15,29 @@ pub struct Score(pub u8);
 
 pub fn display_score(mut commands: Commands) {
     commands.spawn((
-        TextBundle::from_section(
-            "0",
-            TextStyle {
-                font_size: 50.0,
-                ..default()
-            },
-        )
-        .with_text_justify(JustifyText::Center)
-        .with_style(Style {
+        Text::new("0"),
+        TextFont::default().with_font_size(50.0),
+        TextLayout::new_with_justify(JustifyText::Center),
+        Node {
             position_type: PositionType::Absolute,
             top: Val::Px(5.0),
             left: Val::Percent(45.0),
             ..default()
-        }),
+        },
         Score(0),
         Player::Left,
     ));
 
     commands.spawn((
-        TextBundle::from_section(
-            "0",
-            TextStyle {
-                font_size: 50.0,
-                ..default()
-            },
-        )
-        .with_text_justify(JustifyText::Center)
-        .with_style(Style {
+        Text::new("0"),
+        TextFont::default().with_font_size(50.0),
+        TextLayout::new_with_justify(JustifyText::Center),
+        Node {
             position_type: PositionType::Absolute,
             top: Val::Px(5.0),
             left: Val::Percent(55.0),
             ..default()
-        }),
+        },
         Score(0),
         Player::Right,
     ));
@@ -55,7 +45,7 @@ pub fn display_score(mut commands: Commands) {
 
 pub fn update_score(mut query: Query<(&mut Text, &Score)>) {
     for (mut text, score) in query.iter_mut() {
-        text.sections[0].value = format!("{}", score.0);
+        text.0 = format!("{}", score.0);
     }
 }
 

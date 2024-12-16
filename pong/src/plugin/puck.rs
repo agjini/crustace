@@ -3,9 +3,10 @@ use avian3d::prelude::{
 };
 use bevy::asset::{AssetServer, Assets};
 use bevy::core::Name;
+use bevy::pbr::MeshMaterial3d;
 use bevy::prelude::{
-    default, Color, Commands, Component, MaterialMeshBundle, Query, Res, ResMut, StandardMaterial,
-    Transform, Vec3, With,
+    Color, Commands, Component, Mesh3d, Query, Res, ResMut,
+    StandardMaterial, Transform, Vec3, With,
 };
 use rand::Rng;
 
@@ -37,12 +38,9 @@ pub fn add_puck(
             .lock_rotation_y()
             .lock_rotation_z()
             .lock_translation_y(),
-        MaterialMeshBundle {
-            mesh,
-            material,
-            transform: Transform::from_xyz(0.0, 0.2, 0.0),
-            ..default()
-        },
+        Mesh3d(mesh),
+        MeshMaterial3d(material),
+        Transform::from_xyz(0.0, 0.2, 0.0),
         RigidBody::Dynamic,
         Collider::cylinder(PUCK_RADIUS, PUCK_HEIGHT),
         Mass(1.),

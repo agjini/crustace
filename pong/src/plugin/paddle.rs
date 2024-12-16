@@ -3,10 +3,10 @@ use avian3d::prelude::{
 };
 use bevy::asset::AssetServer;
 use bevy::prelude::{
-    default, Assets, Color, Commands, Component, Gamepad, Mut, Name, PbrBundle, Query, Reflect,
-    Res, ResMut, StandardMaterial, Transform, Vec3, With,
+    default, Assets, Color, Commands, Component, Entity, Gamepad, Mesh3d, MeshMaterial3d, Mut,
+    Name, Query, Reflect, Res, ResMut, StandardMaterial, Transform, Vec3, With,
 };
-use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, KeyboardVirtualDPad};
+use leafwing_input_manager::prelude::{ActionState, GamepadStick, InputMap, VirtualDPad};
 use leafwing_input_manager::{Actionlike, InputControlKind, InputManagerBundle};
 
 const PADDLE_HEIGHT: f32 = 0.66;
@@ -37,6 +37,7 @@ fn spawn_paddle(
     materials: &mut ResMut<Assets<StandardMaterial>>,
     player: Player,
 ) {
+    let gamepad = commands.spawn(()).id();
     let paddle_collider = Collider::cylinder(PADDLE_RADIUS, PADDLE_HEIGHT);
     let mesh = asset_server.load("blueprints/Paddle.glb#Mesh0/Primitive0");
     let material = materials.add(StandardMaterial {
@@ -46,21 +47,18 @@ fn spawn_paddle(
         },
         ..default()
     });
-    //let material = asset_server.load(format!("blueprints/Paddle.glb#Material{player:?}"));
+    let transform = match player {
+        Player::Left => Transform::from_xyz(-7., 0.4, 0.),
+        Player::Right => Transform::from_xyz(7., 0.4, 0.),
+    };
     commands.spawn((
         Name::new(format!("Paddle {player:?}")),
-        PbrBundle {
-            mesh,
-            transform: match player {
-                Player::Left => Transform::from_xyz(-7., 0.4, 0.),
-                Player::Right => Transform::from_xyz(7., 0.4, 0.),
-            },
-            material,
-            ..default()
-        },
+        Mesh3d(mesh),
+        MeshMaterial3d(material),
+        transform,
         Paddle,
         player,
-        get_input_map(&player),
+        get_input_map(&player, gamepad),
         RigidBody::Dynamic,
         paddle_collider,
         Friction::new(0.),
@@ -73,19 +71,19 @@ fn spawn_paddle(
     ));
 }
 
-fn get_input_map(player: &Player) -> InputManagerBundle<Action> {
+fn get_input_map(player: &Player, gamepad: Entity) -> InputManagerBundle<Action> {
     match player {
         Player::Left => InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
-                .with_dual_axis(Action::Move, KeyboardVirtualDPad::WASD)
-                .with_gamepad(Gamepad::new(0)),
+                .with_dual_axis(Action::Move, VirtualDPad::wasd())
+                .with_gamepad(gamepad),
         ),
         Player::Right => InputManagerBundle::with_map(
             InputMap::default()
                 .with_dual_axis(Action::Move, GamepadStick::LEFT)
-                .with_dual_axis(Action::Move, KeyboardVirtualDPad::ARROW_KEYS)
-                .with_gamepad(Gamepad::new(1)),
+                .with_dual_axis(Action::Move, VirtualDPad::arrow_keys())
+                .with_gamepad(gamepad),
         ),
     }
 }

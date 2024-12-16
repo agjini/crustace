@@ -63,7 +63,7 @@ fn shake(time: Res<Time>, mut query: Query<(&mut Shake, &mut Transform)>) {
     let perlin3 = Perlin::new(3);
 
     for (mut shake, mut transform) in query.iter_mut() {
-        shake.time -= time.delta_seconds();
+        shake.time -= time.delta().as_secs_f32();
         shake.time = shake.time.max(0.0);
         if shake.time == 0.0 {
             continue;
