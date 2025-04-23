@@ -1,15 +1,17 @@
-use std::env;
+use minigrep::Config;
+use std::collections::VecDeque;
+use std::{env, process};
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args: VecDeque<String> = env::args().collect();
 
-    let (query, file_path) = parse_config(&args);
+    let config = Config::build(args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
-    // --snip--
-}
-
-fn parse_config(args: &[String]) -> (&str, &str) {
-    let query = &args[1];
-    let file_path = &args[2];
-  
-    (query, file_path)
+    if let Err(e) = minigrep::run(config) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
