@@ -69,6 +69,7 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a st
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn one_result() {
         let query = "duct";
@@ -79,6 +80,7 @@ Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
     }
+
     #[test]
     fn multi_result() {
         let query = "duct";
