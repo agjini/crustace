@@ -60,4 +60,32 @@ fn main() {
         "The user with preference {:?} gets {:?}",
         user_pref2, giveaway2
     );
+
+    // let mut list = vec![1, 2, 3];
+    // println!("Before defining closure: {list:?}");
+
+    // let mut borrows_mutably = move || {
+    //     list.push(7);
+    //     let new_list = list.clone();
+    //     list.push(9);
+    //     new_list
+    // };
+    // let mut list = borrows_mutably();
+    // println!("After calling closure: {list:?}");
+    // list.push(8);
+    // let list_2 = borrows_mutably();
+    // println!("After calling closure: {list:?}, {list_2:?}");
+
+    let mut list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    let th_handle = thread::spawn(move || {
+        thread::sleep(Duration::from_secs(5));
+        println!("End of thread: {list:?}");
+        list.push(4);
+        vec![1, 2]
+    });
+    println!("After spawning thread");
+    // let th_handle.join().unwrap();
+    println!("end of program:");
 }
