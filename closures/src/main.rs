@@ -13,7 +13,7 @@ struct Inventory {
 
 impl Inventory {
     fn giveaway(&self, user_preference: Option<ShirtColor>) -> ShirtColor {
-        user_preference.unwrap_or_else(|| self.most_stocked())
+        user_preference.unwrap_or_else(|| Inventory::most_stocked(self))
     }
 
     fn most_stocked(&self) -> ShirtColor {
@@ -32,6 +32,12 @@ impl Inventory {
             ShirtColor::Blue
         }
     }
+}
+
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
 }
 
 fn main() {
@@ -75,17 +81,119 @@ fn main() {
     // list.push(8);
     // let list_2 = borrows_mutably();
     // println!("After calling closure: {list:?}, {list_2:?}");
+    //
+    // let mut list = vec![1, 2, 3];
+    // println!("Before defining closure: {list:?}");
+    //
+    // let th_handle = thread::spawn(move || {
+    //     thread::sleep(Duration::from_secs(5));
+    //     println!("End of thread: {list:?}");
+    //     list.push(4);
+    //     vec![1, 2]
+    // });
+    // println!("After spawning thread");
+    // // let th_handle.join().unwrap();
+    // println!("end of program:");
+    //
 
-    let mut list = vec![1, 2, 3];
+    let list = vec![1, 2, 3];
     println!("Before defining closure: {list:?}");
 
-    let th_handle = thread::spawn(move || {
-        thread::sleep(Duration::from_secs(5));
-        println!("End of thread: {list:?}");
+    let closure = || {
+        println!("From thread: {list:?}");
+    };
+
+    let closure1 = move || {
+        println!("From thread: {list:?}");
+    };
+
+    // let closure2f = move || {
+    //     println!("From thread: {list:?}");
+    //     list
+    // };
+
+    let mut list = vec![1, 2, 3];
+    let closure3 = move || {
+        println!("From thread: {list:?}");
         list.push(4);
-        vec![1, 2]
+        list
+    };
+
+    let mut list = vec![1, 2, 3];
+    let mut closure4 = || {
+        println!("From thread: {list:?}");
+        list.push(4);
+    };
+
+    //closure4();
+
+    closure4();
+    closure4();
+    closure4();
+    closure4();
+    closure4();
+    closure4();
+    closure4();
+
+    //thread::spawn(closure3);
+
+    // drop list
+
+    let mut list = [
+        Rectangle {
+            width: 10,
+            height: 1,
+        },
+        Rectangle {
+            width: 3,
+            height: 5,
+        },
+        Rectangle {
+            width: 7,
+            height: 12,
+        },
+    ];
+
+    list.sort_by_key(|r| r.width);
+    println!("{list:#?}");
+
+    let mut list = [
+        Rectangle {
+            width: 10,
+            height: 1,
+        },
+        Rectangle {
+            width: 3,
+            height: 5,
+        },
+        Rectangle {
+            width: 7,
+            height: 12,
+        },
+    ];
+
+    // let mut sort_operations = vec![];
+    // let value = String::from("closure called");
+    //
+    // print!("{sort_operations:#?}");
+    //
+    // let close = |r: &Rectangle| {
+    //     sort_operations.push(String::from("closure called"));
+    //     r.width
+    // };
+    //
+    // list.sort_by_key(close);
+    //
+    // print!("{sort_operations:#?}");
+    // println!("{list:#?}");
+    // let mut sort_operations = vec![];
+    // let value = String::from("closure called");
+
+    let mut num_sort_operations = 0;
+
+    list.sort_by_key(|r| {
+        num_sort_operations += 1;
+        r.width
     });
-    println!("After spawning thread");
-    // let th_handle.join().unwrap();
-    println!("end of program:");
+    println!("{list:#?}, sorted in {num_sort_operations} operations");
 }
