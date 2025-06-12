@@ -96,21 +96,33 @@ fn main() {
     // println!("end of program:");
     //
 
-    let list = vec![1, 2, 3];
+    let mut list = vec![1, 2, 3];
     println!("Before defining closure: {list:?}");
 
-    let closure = || {
+    let mut closure = move || {
         println!("From thread: {list:?}");
+        list.push(4);
+        list.clone()
     };
 
-    let closure1 = move || {
-        println!("From thread: {list:?}");
-    };
+    // println!("After defining closure {list:?}");
+    println!("{:?}", closure());
+    let list = closure();
+    closure();
 
-    // let closure2f = move || {
+    // let closure1 = move || {
     //     println!("From thread: {list:?}");
-    //     list
     // };
+
+    //println!("After defining closure {list:?}");
+
+    let closure2f = move || {
+        println!("From thread: {list:?}");
+        list
+    };
+
+    let list_returned = closure2f();
+    closure2f();
 
     let mut list = vec![1, 2, 3];
     let closure3 = move || {
