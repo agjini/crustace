@@ -1,3 +1,6 @@
+//! # MiniGrep
+//!
+//!
 use std::error::Error;
 use std::{env, fs};
 
@@ -45,6 +48,14 @@ impl Config {
     }
 }
 
+/// Adds one to the number given.
+// --snip--
+/// search documentation
+/// ```
+/// use minigrep::search;
+/// let result = search("query", "line1\nline2\nquery line3");
+/// assert_eq!(result, vec!["query line3"]);
+/// ```
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     contents
         .lines()
