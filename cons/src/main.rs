@@ -2,6 +2,8 @@
 
 // https://doc.rust-lang.org/book/ch15-02-deref.html#implicit-deref-coercions-with-functions-and-methods
 
+use std::ops::Deref;
+
 enum List {
     Nil,
     Cons(i32, Box<List>),
@@ -22,7 +24,7 @@ impl<T> MyBox<T> {
     }
 }
 
-impl<T> std::ops::Deref for MyBox<T> {
+impl<T> Deref for MyBox<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -41,8 +43,41 @@ fn main() {
     // assert_eq!(5, x);
     // assert_eq!(5, *y);
 
-    let m = MyBox::new(String::from("Rust"));
-    hello(&m);
+    let b = Box::new(Point { x: 5, y: 10 });
+
+    println!("i.x = {}, i.y = {}", b.x, b.y);
+    display_point(&b); // 1 coercion
+    display(&b); // 2 x coercion
+
+    let string_slice = "Rust";
+    let mut string = String::from(String::from("Augu"));
+    string.push_str("Maxime");
+
+    let mm = &string[1..4];
+
+    hello(mm);
+}
+
+fn display_point(point: &Point) {
+    println!("i.x = {}, i.y = {}", point.x, point.y);
+}
+
+fn display(point: &i32) {
+    println!("i.x = {}", point);
+}
+
+#[derive(Clone)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+impl Deref for Point {
+    type Target = i32;
+
+    fn deref(&self) -> &i32 {
+        &self.x
+    }
 }
 
 fn hello(name: &str) {
