@@ -56,9 +56,6 @@ mod tests {
 
     impl Messenger for MockMessenger {
         fn send(&self, message: &str) {
-            {
-                let _borrowed_sent_messages = self.sent_messages.borrow();
-            }
             self.sent_messages.borrow_mut().push(String::from(message));
         }
     }
