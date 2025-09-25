@@ -33,14 +33,20 @@ fn main() {
     println!("b initial rc count = {}", Rc::strong_count(&b));
     println!("b next item = {:?}", b.tail());
 
-    if let Some(link) = a.tail() {
-        *link.borrow_mut() = Rc::clone(&b);
-    }
+    // if let Some(link) = a.tail() {
+    //     *link.borrow_mut() = Rc::clone(&b);
+    // }
 
     println!("b rc count after changing a = {}", Rc::strong_count(&b));
     println!("a rc count after changing a = {}", Rc::strong_count(&a));
 
+    drop(a);
+
+    println!("b rc count after changing b = {}", Rc::strong_count(&b));
+
+    //println!("a next item = {:?}", b);
+
     // Uncomment the next line to see that we have a cycle;
     // it will overflow the stack.
-    println!("a next item = {:?}", a.tail());
+    //println!("a next item = {:?}", a.tail());
 }
