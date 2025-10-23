@@ -1,18 +1,28 @@
+use std::sync::mpsc;
 use std::thread;
-use std::time::Duration;
 
-fn main() {
-    let handle = thread::spawn(|| {
-        for i in 1..10 {
-            println!("hi number {i} from the spawned thread!");
-            thread::sleep(Duration::from_millis(1));
-        }
+fn _main2() {
+    let v = vec![1, 2, 3];
+
+    let handle = thread::spawn(move || {
+        println!("Here's a vector: {v:?}");
     });
 
-    for i in 1..5 {
-        println!("hi number {i} from the main thread!");
-        thread::sleep(Duration::from_millis(1));
-    }
-
     handle.join().unwrap();
+}
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        let val2 = String::from("ho");
+        tx.send(val).unwrap();
+        tx.send(val2).unwrap();
+    });
+
+    let toto = rx.recv().unwrap();
+    let tata = rx.recv().unwrap();
+    println!("Got: {}", toto);
+    println!("Got: {}", tata);
 }
