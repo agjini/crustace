@@ -1,18 +1,25 @@
-use std::sync::Mutex;
+use std::sync::atomic::AtomicI32;
+use std::sync::Arc;
 use std::thread;
 
 fn main() {
-    let m = Mutex::new(5);
+    let counter = Arc::new(AtomicI32::new(0));
+    let mut handles = vec![];
 
-    {
-        let mut num = m.lock().unwrap();
-        *num = 6;
+    for _ in 0..10 {
+        let counter = Arc::clone(&counter);
+        let handle = thread::spawn(move || {
+            // let mut num = counter.lock().unwrap();
+
+            counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        });
+        handles.push(handle);
     }
 
-    thread::spawn(move || {
-        let mut num = m.lock().unwrap();
-        *num += 1;
-    });
+    for handle in handles {
+        handle.join().unwrap();
+    }
 
-    //println!("m = {m:?}");
+    // println!("Result: {}", *counter.lock().unwrap());
+    println!("Result: {:?}", *counter);
 }
