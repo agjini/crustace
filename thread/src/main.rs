@@ -1,17 +1,21 @@
-use std::sync::atomic::AtomicI32;
 use std::sync::Arc;
 use std::thread;
 
+mod counter;
+
+use counter::Counter;
+
 fn main() {
-    let counter = Arc::new(AtomicI32::new(0));
+    let counter = Counter::new(0);
+    let table = Arc::new(vec![0; 10]);
     let mut handles = vec![];
 
     for _ in 0..10 {
-        let counter = Arc::clone(&counter);
+        let mut counter = Counter::clone(&counter);
+        let table = Arc::clone(&table);
         let handle = thread::spawn(move || {
-            // let mut num = counter.lock().unwrap();
-
-            counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            counter.inc();
+            println!("table {:?}", table);
         });
         handles.push(handle);
     }
@@ -20,6 +24,5 @@ fn main() {
         handle.join().unwrap();
     }
 
-    // println!("Result: {}", *counter.lock().unwrap());
-    println!("Result: {:?}", *counter);
+    println!("Result: {}", counter.value());
 }
