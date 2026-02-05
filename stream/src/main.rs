@@ -2,6 +2,7 @@ use std::pin::{pin, Pin};
 use std::time::Duration;
 use trpl;
 
+// https://doc.rust-lang.org/book/ch18-02-trait-objects.html
 fn main() {
     trpl::block_on(async {
         let tx_fut = pin!(async move {
