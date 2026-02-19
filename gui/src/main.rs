@@ -17,6 +17,41 @@ impl Draw for SelectBox {
         }
     }
 }
+//
+// impl Draw for PrettyString {
+//     fn draw(&self) {
+//         println!("************");
+//         println!("{}", self.string);
+//         println!("************");
+//     }
+// }
+
+fn main() {
+    let screen = Screen::new()
+        .add(PrettyString {
+            string: "Hello World!".to_string(),
+        })
+        .add(Button {
+            width: 10,
+            height: 20,
+            label: "Click me!".to_string(),
+        })
+        .add(PrettyButton {
+            button: Button {
+                width: 10,
+                height: 20,
+                label: "Click me!".to_string(),
+            },
+        })
+        .add(SelectBox {
+            width: 10,
+            height: 20,
+            options: vec!["aaa".to_string(), "bbb".to_string()],
+        })
+        .build();
+
+    screen.run();
+}
 
 impl Draw for PrettyString {
     fn draw(&self) {
@@ -24,31 +59,4 @@ impl Draw for PrettyString {
         println!("{}", self.string);
         println!("************");
     }
-}
-
-fn main() {
-    let mut screen = Screen {
-        components: Vec::new(),
-    };
-    screen.components.push(Box::new(Button {
-        width: 10,
-        height: 20,
-        label: "Click me!".to_string(),
-    }));
-    screen.components.push(Box::new(PrettyButton {
-        button: Button {
-            width: 10,
-            height: 20,
-            label: "Click me!".to_string(),
-        },
-    }));
-    screen.components.push(Box::new(SelectBox {
-        width: 10,
-        height: 20,
-        options: vec!["aaa".to_string(), "bbb".to_string()],
-    }));
-    screen.components.push(Box::new(PrettyString {
-        string: "Hello World!".to_string(),
-    }));
-    screen.run();
 }

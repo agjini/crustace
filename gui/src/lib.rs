@@ -6,16 +6,30 @@ pub trait Draw {
         println!("default_draw");
     }
 }
+
+#[derive(Default)]
 pub struct Screen {
     pub components: Vec<Box<dyn Draw>>,
 }
+
 impl Screen {
     pub fn run(&self) {
         for component in self.components.iter() {
             component.draw();
         }
     }
+
+    pub fn add<T: Draw + 'static>(&mut self, component: T) {
+        self.components.push(Box::new(component));
+    }
 }
+
+impl Screen {
+    pub fn new() -> ScreenBuilder {
+        ScreenBuilder::default()
+    }
+}
+
 pub struct Button {
     pub width: u32,
     pub height: u32,
@@ -27,6 +41,7 @@ impl Draw for Button {
         println!("{}", self.label);
     }
 }
+
 pub struct PrettyButton {
     pub button: Button,
 }
@@ -36,5 +51,23 @@ impl Draw for PrettyButton {
         println!("********");
         self.button.draw();
         println!("********");
+    }
+}
+
+#[derive(Default)]
+pub struct ScreenBuilder {
+    pub components: Vec<Box<dyn Draw>>,
+}
+
+impl ScreenBuilder {
+    pub fn add<T: Draw + 'static>(mut self, component: T) -> Self {
+        self.components.push(Box::new(component));
+        self
+    }
+
+    pub fn build(self) -> Screen {
+        Screen {
+            components: self.components,
+        }
     }
 }
