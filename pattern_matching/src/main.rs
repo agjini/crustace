@@ -6,6 +6,13 @@ struct Point {
 // struct PointTuple(i32, i32);
 
 use Message::{ChangeColor, Move, Quit, Write};
+struct Point3 {
+    x: i32,
+    y: i32,
+    z: i32,
+}
+
+struct Point3T(i32, i32, i32);
 
 pub enum Color {
     Rgb(i32, i32, i32),
@@ -19,7 +26,96 @@ pub enum Message {
     ChangeColor(Color),
 }
 
+fn arity(x: i32) -> String {
+    if x % 2 == 0 {
+        "even".to_string()
+    } else {
+        "odd".to_string()
+    }
+}
+
 fn main() {
+    enum Message {
+        Hello { id: i32 },
+    }
+
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello { id: id @ 3..=7 } => {
+            println!("Found an id in range: {}", id)
+        }
+        Message::Hello { id: 10..=12 } => {
+            println!("Found an id in another range")
+        }
+        Message::Hello { id } => println!("Found some other id: {id}"),
+    }
+
+    let x = 4;
+    let y = false;
+
+    match x {
+        4 | 5 | 6 if y => println!("yes"),
+        _ => println!("no"),
+    }
+
+    let x = 4;
+    let y = false;
+
+    match x {
+        4 | 5 => println!("yy"),
+        6 if y => println!("yes"),
+        _ => println!("no"),
+    }
+
+    let num = Some(4);
+
+    if let Some(a) = num.map(arity) {
+        println!("sdsd {}", a)
+    }
+
+    let origin = Point3 { x: 0, y: 0, z: 0 };
+    let origin_layer_10 = Point3 { z: 10, ..origin };
+
+    match origin {
+        Point3 { x: 0, .. } => println!("on x origin"),
+        _ => println!("x is not on origin : {}", origin.x),
+    }
+
+    let origin = Point3T(0, 0, 0);
+    let origin_layer_10 = Point3T(10, origin.1, origin.2);
+
+    match origin {
+        Point3T(x, ..) => println!("x is {x}"),
+    }
+
+    let origin = [10, 0, 0];
+
+    let origin_layer_10 = origin
+        .into_iter()
+        .enumerate()
+        .map(|(i, v)| if i == 0 { 10 } else { v });
+
+    let origin_layer_10 = [..origin];
+
+    match origin {
+        [x, tail @ ..] => println!("x is {x}"),
+    }
+
+    let numbers = (2, 4, 8, 16, 32);
+
+    let (first, _, before, _, last) = numbers;
+
+    println!("Some numbers: {first}, {last}");
+
+    let s = Some(String::from("Hello!"));
+
+    if let Some(_) = s {
+        println!("found a string");
+    }
+
+    println!("{s:?}");
+
     let ((feet, inches), Point { x, y }) = ((3, 10), Point { x: 3, y: -10 });
 
     /////////////////////
