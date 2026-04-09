@@ -1,3 +1,0 @@
-[workspace]
-resolver = "3"
-members = ["add_one", "add_two", "adder"]
