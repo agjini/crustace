@@ -1,20 +1,19 @@
+use std::slice;
 fn main() {
-    let mut array_original: [i32; 6] = [32, 34, 468, 1, 2, 3];
-    // let mut array: [i32; 6] = 0x7fff92065f08;
+    use std::slice;
 
-    let pointer: *mut i32 = 0x7fff92065f08 as *mut i32;
+    fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+        let len = values.len();
+        let ptr = values.as_mut_ptr();
 
-    println!("Addresse du pointeur en mémoire {:?}", pointer);
-    println!("Valeur présente à cette addresse '{:?}'", unsafe {
-        *pointer
-    });
+        assert!(mid <= len);
 
-    unsafe {
-        *pointer = 666;
+        unsafe {
+            let toto = slice::from_raw_parts_mut(ptr, mid);
+            (
+                slice::from_raw_parts_mut(ptr, mid),
+                slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+            )
+        }
     }
-
-    println!("Addresse du pointeur en mémoire {:?}", pointer);
-    println!("Valeur présente à cette addresse '{:?}'", unsafe {
-        *pointer
-    });
 }
