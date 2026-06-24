@@ -2,8 +2,7 @@ use rand::distr::StandardUniform;
 use rand::prelude::Distribution;
 use rand::{Rng, RngExt};
 use std::fmt::{Display, Formatter};
-use std::io;
-use std::io::{Read, stdin};
+use std::io::stdin;
 
 enum Color {
     /// Pique
