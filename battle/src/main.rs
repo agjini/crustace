@@ -9,7 +9,7 @@ enum Color {
     Spade,
 
     /// Coeur
-    Hearth,
+    Heart,
 
     /// Carreau
     Diamond,
@@ -64,7 +64,7 @@ impl Display for Color {
             Color::Club => '♣',
             Color::Diamond => '♦',
             Color::Spade => '♠',
-            Color::Hearth => '♥',
+            Color::Heart => '♥',
         };
         write!(f, "{}", char)
     }
@@ -76,7 +76,7 @@ impl Distribution<Color> for StandardUniform {
         match random_color {
             0 => Color::Spade,
             1 => Color::Diamond,
-            2 => Color::Hearth,
+            2 => Color::Heart,
             _ => Color::Club,
         }
     }

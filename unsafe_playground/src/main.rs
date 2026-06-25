@@ -1,5 +1,7 @@
 use std::slice;
 
+mod tt_test;
+
 unsafe extern "C" {
     fn abs(input: i32) -> u32;
 }
@@ -14,44 +16,65 @@ unsafe extern "C" {
     fn cos(x: f64) -> f64;
 }
 
-static HELLO_WORLD: &str = "Hello, world!";
+static mut COUNTER: u32 = 0;
+
+/// SAFETY: Calling this from more than a single thread at a time is undefined
+/// behavior, so you *must* guarantee you only call it from a single thread at
+/// a time.
+unsafe fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
 
 fn main() {
-    println!("value is: {HELLO_WORLD}");
-    let c = unsafe { cos(0.0) };
-    // println!("Absolute value of -3 according to C: {}", unsafe {
-    //     let s = String::from("salut");
-    //     let s2 = s;
-    //
-    //     println!("s2 is {}", s);
-    //
-    //     abs(-3)
-    // });
-    //
-    // split_at_mut(&mut [1, 2, 3, 4, 5], 3);
-    //
-    // let address = 0x01234usize;
-    // let r = address as *mut i32;
-    //
-    // let values: &[i32] = unsafe { slice::from_raw_parts_mut(r, 10000) };
-    //
-    // let address = 0x01234 + 120;
-    // let address = address as *const i32;
-
-    let address = get_raw_ptr() as usize + 8;
-    let address = address as *const u8;
-    println!("value @ {:p} : {}", address, unsafe { *address });
-    let mut_address = address as *mut usize;
     unsafe {
-        *mut_address = 0;
+        // SAFETY: This is only called from a single thread in `main`.
+        add_to_count(3);
+        //println!("COUNTER: {}", *(&raw const COUNTER));
+        println!("COUNTER: {}", *(&raw const COUNTER));
     }
-    println!("value @ {:p} : {}", address, unsafe { *address });
-
-    // let address = &value;
-    // println!("value @ {:p} : {}", address, *address);
-
-    // println!("values: {:?}", values);
 }
+
+//fn main() {
+//HELLO_WORLD = "salut gianni";
+
+//subfunc();
+
+//let c = unsafe { cos(0.0) };
+// println!("Absolute value of -3 according to C: {}", unsafe {
+//     let s = String::from("salut");
+//     let s2 = s;
+//
+//     println!("s2 is {}", s);
+//
+//     abs(-3)
+// });
+//
+// split_at_mut(&mut [1, 2, 3, 4, 5], 3);
+//
+// let address = 0x01234usize;
+// let r = address as *mut i32;
+//
+// let values: &[i32] = unsafe { slice::from_raw_parts_mut(r, 10000) };
+//
+// let address = 0x01234 + 120;
+// let address = address as *const i32;
+
+// let address = get_raw_ptr() as usize + 8;
+// let address = address as *const u8;
+// println!("value @ {:p} : {}", address, unsafe { *address });
+// let mut_address = address as *mut usize;
+// unsafe {
+//     *mut_address = 0;
+// }
+// println!("value @ {:p} : {}", address, unsafe { *address });
+
+// let address = &value;
+// println!("value @ {:p} : {}", address, *address);
+
+// println!("values: {:?}", values);
+//}
 
 fn get_raw_ptr() -> *const u8 {
     let mut value = String::from(
