@@ -41,6 +41,7 @@ impl Display for Millimeters {
         write!(f, "{}mm", self.0)
     }
 }
+
 fn main() {
     let meter = Meters(2);
     let mili = Millimeters(8);
