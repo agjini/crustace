@@ -35,6 +35,6 @@ fn simple_plan2(o: &Operation) -> i32 {
     44
 }
 
-fn simple_plan(v: &str) -> i32 {
+fn simple_plan(v: &[String]) -> i32 {
     v.len() as i32
 }
