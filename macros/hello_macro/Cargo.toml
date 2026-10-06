@@ -4,3 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+hello_macro_derive = { path = "hello_macro_derive" }

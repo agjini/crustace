@@ -1,13 +1,24 @@
 use hello_macro::HelloMacro;
+use hello_macro::hello_macro_derive::{measure, sql};
+use serde::{Deserialize, Serialize};
 
-struct Pancakes;
-
-impl HelloMacro for Pancakes {
-    fn hello_macro() {
-        println!("Hello, Macro! My name is Pancakes!");
-    }
+#[derive(Deserialize, Serialize)]
+struct Blinis {
+    #[serde(rename = "nnn")]
+    name: String,
 }
 
+#[measure]
+fn hellop();
+
 fn main() {
-    Pancakes::hello_macro();
+    //Blinis::hello_macro();
+
+    let b = Blinis {
+        name: "Tapenade".to_string(),
+    };
+    println!("TOTO \n{}", serde_yaml::to_string(&b).unwrap());
+
+    let sql = sql!(SELECT 1 FROM toto);
+    println!("{}", sql)
 }
