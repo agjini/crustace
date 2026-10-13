@@ -19,14 +19,14 @@ use syn::{DeriveInput, ItemFn, TraitItemFn, parse_macro_input};
 #[proc_macro_attribute]
 pub fn measure(attr: TokenStream, item: TokenStream) -> TokenStream {
     let item: TraitItemFn = syn::parse(item).unwrap();
-
-    let command = Command::new("whoami").output().unwrap().stdout;
-    let who = String::from_utf8(command).unwrap();
-
-    Command::new("notify-send")
-        .arg(format!("Salut {}", &who))
-        .output()
-        .expect("failed to execute process");
+    //
+    // let command = Command::new("whoami").output().unwrap().stdout;
+    // let who = String::from_utf8(command).unwrap();
+    //
+    // Command::new("notify-send")
+    //     .arg(format!("Salut {}", &who))
+    //     .output()
+    //     .expect("failed to execute process");
 
     let vv = item.sig.ident.to_string();
     //item.into_token_stream().into()
@@ -53,11 +53,12 @@ fn impl_hello_macro(p0: &DeriveInput) -> TokenStream {
 #[proc_macro]
 pub fn sql(input: TokenStream) -> TokenStream {
     let dialect = GenericDialect {};
-    let statements = Parser::parse_sql(&dialect, &input.to_string()).unwrap();
+    let sql = input.to_string();
+    let parser = Parser::new(&dialect);
+    let statements = parser.parse_select(&sql).unwrap();
     assert_eq!(statements.len(), 1);
-    let statement = "pipi";
     quote! {
-        #statement
+        #sql
     }
     .into()
 }

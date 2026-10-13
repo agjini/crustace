@@ -19,6 +19,6 @@ fn main() {
     };
     println!("TOTO \n{}", serde_yaml::to_string(&b).unwrap());
 
-    let sql = sql!(SELECT 1 FROM toto);
+    let sql = sql!(SELECT 1 FFF);
     println!("{}", sql)
 }
