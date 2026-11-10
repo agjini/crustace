@@ -1,9 +1,11 @@
 use crate::header::{Header, Status, write_headers, write_status};
 use std::fs::File;
+use std::time::Duration;
 use std::{
     io,
     io::{BufReader, prelude::*},
     net::{TcpListener, TcpStream},
+    thread,
 };
 
 mod header;
@@ -14,11 +16,13 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        if let Err(e) = handle_connection(stream) {
+            println!("Connection closed: {}", e);
+        }
     }
 }
 
-fn handle_connection(stream: TcpStream) {
+fn handle_connection(stream: TcpStream) -> io::Result<()> {
     let buf_reader = BufReader::new(&stream);
     let http_request: Vec<_> = buf_reader
         .lines()
@@ -27,29 +31,31 @@ fn handle_connection(stream: TcpStream) {
         .collect();
 
     let Some(header) = http_request.get(0) else {
-        return;
+        return Ok(());
     };
 
-    if header == "GET / HTTP/1.1" {
-        write_response(stream, "hello.html", Status::Ok);
-    } else {
-        write_response(stream, "404.html", Status::NotFound);
+    match header.as_str() {
+        "GET / HTTP/1.1" => write_response(stream, "hello.html", Status::Ok),
+        "GET /sleep HTTP/1.1" => {
+            thread::sleep(Duration::from_secs(5));
+            write_response(stream, "hello.html", Status::Ok)
+        }
+        _ => write_response(stream, "404.html", Status::NotFound),
     }
 }
 
-fn write_response(mut stream: TcpStream, file: &str, status: Status) {
-    let mut file = File::open(format!("src/{file}")).unwrap();
+fn write_response(mut stream: TcpStream, file: &str, status: Status) -> io::Result<()> {
+    let mut file = File::open(format!("src/{file}"))?;
 
     write_status(&mut stream, status);
 
     let headers = vec![
         Header::new("Content-Type", "text/html"),
-        Header::new(
-            "Content-Length",
-            &file.metadata().unwrap().len().to_string(),
-        ),
+        Header::new("Content-Length", &file.metadata()?.len().to_string()),
     ];
-    write_headers(&mut stream, headers);
+    write_headers(&mut stream, headers)?;
 
-    io::copy(&mut file, &mut stream).unwrap();
+    io::copy(&mut file, &mut stream)?;
+
+    Ok(())
 }

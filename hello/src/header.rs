@@ -39,12 +39,12 @@ pub fn write_status(stream: &mut TcpStream, status: Status) {
     stream.write_all(status.as_bytes()).unwrap();
 }
 
-pub fn write_headers(stream: &mut TcpStream, headers: Vec<Header>) {
+pub fn write_headers(stream: &mut TcpStream, headers: Vec<Header>) -> std::io::Result<()> {
     for header in headers {
-        stream.write_all(header.name.as_bytes()).unwrap();
-        stream.write_all(": ".as_bytes()).unwrap();
-        stream.write_all(header.value.as_bytes()).unwrap();
-        stream.write_all(b"\r\n").unwrap();
+        stream.write_all(header.name.as_bytes())?;
+        stream.write_all(": ".as_bytes())?;
+        stream.write_all(header.value.as_bytes())?;
+        stream.write_all(b"\r\n")?;
     }
-    stream.write_all(b"\r\n").unwrap();
+    stream.write_all(b"\r\n")
 }
