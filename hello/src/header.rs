@@ -4,11 +4,19 @@ use std::net::TcpStream;
 
 pub enum Status {
     Ok,
+    NotFound,
 }
 
 impl Display for Status {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "200 OK")
+        match self {
+            Status::Ok => {
+                write!(f, "200 OK")
+            }
+            Status::NotFound => {
+                write!(f, "404 NOT FOUND")
+            }
+        }
     }
 }
 

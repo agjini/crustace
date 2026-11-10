@@ -26,15 +26,21 @@ fn handle_connection(stream: TcpStream) {
         .take_while(|line| !line.is_empty())
         .collect();
 
-    if http_request[0] == "GET / HTTP/1.1" {
-        write_response(stream, "hello.html");
+    let Some(header) = http_request.get(0) else {
+        return;
+    };
+
+    if header == "GET / HTTP/1.1" {
+        write_response(stream, "hello.html", Status::Ok);
+    } else {
+        write_response(stream, "404.html", Status::NotFound);
     }
 }
 
-fn write_response(mut stream: TcpStream, file: &str) {
+fn write_response(mut stream: TcpStream, file: &str, status: Status) {
     let mut file = File::open(format!("src/{file}")).unwrap();
 
-    write_status(&mut stream, Status::Ok);
+    write_status(&mut stream, status);
 
     let headers = vec![
         Header::new("Content-Type", "text/html"),
