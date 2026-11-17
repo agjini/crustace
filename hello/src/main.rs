@@ -1,3 +1,4 @@
+use crate::error::{HelloError, HelloResult};
 use crate::header::{Header, Status, write_headers, write_status};
 use std::fs::File;
 use std::time::Duration;
@@ -8,6 +9,7 @@ use std::{
     thread,
 };
 
+mod error;
 mod header;
 
 fn main() {
@@ -17,12 +19,20 @@ fn main() {
         let stream = stream.unwrap();
 
         if let Err(e) = handle_connection(stream) {
-            println!("Connection closed: {}", e);
+            log_error(e);
         }
     }
 }
 
-fn handle_connection(stream: TcpStream) -> io::Result<()> {
+fn log_error(e: HelloError) {
+    match e {
+        HelloError::ClientConnectionClosed => {
+            println!("Connection closed");
+        }
+    }
+}
+
+fn handle_connection(stream: TcpStream) -> HelloResult<()> {
     let buf_reader = BufReader::new(&stream);
     let http_request: Vec<_> = buf_reader
         .lines()
@@ -44,7 +54,7 @@ fn handle_connection(stream: TcpStream) -> io::Result<()> {
     }
 }
 
-fn write_response(mut stream: TcpStream, file: &str, status: Status) -> io::Result<()> {
+fn write_response(mut stream: TcpStream, file: &str, status: Status) -> HelloResult<()> {
     let mut file = File::open(format!("src/{file}"))?;
 
     write_status(&mut stream, status);

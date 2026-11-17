@@ -1,3 +1,4 @@
+use crate::error::HelloResult;
 use std::fmt::{Display, Formatter};
 use std::io::Write;
 use std::net::TcpStream;
@@ -39,12 +40,13 @@ pub fn write_status(stream: &mut TcpStream, status: Status) {
     stream.write_all(status.as_bytes()).unwrap();
 }
 
-pub fn write_headers(stream: &mut TcpStream, headers: Vec<Header>) -> std::io::Result<()> {
+pub fn write_headers(stream: &mut TcpStream, headers: Vec<Header>) -> HelloResult<()> {
     for header in headers {
         stream.write_all(header.name.as_bytes())?;
         stream.write_all(": ".as_bytes())?;
         stream.write_all(header.value.as_bytes())?;
         stream.write_all(b"\r\n")?;
     }
-    stream.write_all(b"\r\n")
+    stream.write_all(b"\r\n")?;
+    Ok(())
 }
