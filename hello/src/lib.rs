@@ -1,11 +1,22 @@
 pub struct ThreadPool;
 
 impl ThreadPool {
-    pub fn new(size: usize) -> Self {
+    /// Create a new ThreadPool.
+    ///
+    /// The size is the number of threads in the pool.
+    ///
+    /// # Panics
+    ///
+    /// The `new` function will panic if the size is zero.
+    pub fn new(size: usize) -> ThreadPool {
+        assert!(size > 0, "A threadPool cannot has size of {}", size);
         ThreadPool
     }
 
-    pub fn execute<F: FnOnce() -> ()>(&self, job: F) {
+    pub fn execute<F>(&self, job: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
         job()
     }
 }
